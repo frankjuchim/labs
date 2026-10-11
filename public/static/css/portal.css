@@ -31,7 +31,10 @@ main { flex: 1; }
 img, svg { max-width: 100%; }
 a { color: var(--primaer); }
 a:hover { color: var(--primaer-dunkel); }
-h1, h2, h3 { line-height: 1.2; margin: 0 0 0.5em; }
+h1, h2, h3 { line-height: 1.2; margin: 0 0 0.5em; hyphens: auto; overflow-wrap: break-word; }
+/* lange deutsche Wörter dürfen auf schmalen Bildschirmen umbrechen (kein horizontales Scrollen) */
+p, li, td, th, summary, label, .karte { overflow-wrap: break-word; }
+h1 { overflow-wrap: anywhere; }
 h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); }
 h2 { font-size: 1.35rem; }
 h3 { font-size: 1.1rem; }

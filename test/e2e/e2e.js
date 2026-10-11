@@ -188,7 +188,7 @@ async function main() {
     await bild(gastHandy, 'startseite_handy.png');
 
     /* 9. keine horizontale Scrollleiste auf dem Smartphone */
-    for (const [p, url] of [[gastHandy, '/'], [gastHandy, '/datenschutz']]) {
+    for (const [p, url] of [[gastHandy, '/'], [gastHandy, '/datenschutz'], [gastHandy, '/anmelden?weiter=%2Fsso%2Fautorisieren%3Fplattform%3Dtestlabor'], [gastHandy, '/gibt-es-nicht']]) {
       await p.goto(portalUrl + url);
       const breit = await p.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
       assert.ok(breit <= 1, `${url}: horizontales Scrollen (${breit}px)`);
