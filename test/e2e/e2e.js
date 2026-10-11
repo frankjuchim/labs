@@ -193,6 +193,8 @@ async function main() {
       const breit = await p.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
       assert.ok(breit <= 1, `${url}: horizontales Scrollen (${breit}px)`);
     }
+    // der absichtliche Aufruf einer unbekannten Adresse meldet der Browser als 404 – das ist hier gewollt
+    for (let i = fehler.length - 1; i >= 0; i--) if (/\/gibt-es-nicht: .*404/.test(fehler[i])) fehler.splice(i, 1);
 
     assert.deepEqual(fehler, [], 'Konsolenfehler:\n' + fehler.join('\n'));
     console.log(`✔ E2E-Durchlauf erfolgreich (Kurscode ${kurscode}). Screenshots: docs/screenshots/`);
