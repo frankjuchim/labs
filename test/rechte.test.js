@@ -30,7 +30,10 @@ const ADMIN = [
   ['get', '/api/admin/schluessel'],
   ['get', '/api/admin/auftraege'],
   ['post', '/api/admin/import'],
-  ['get', '/api/admin/importe']
+  ['get', '/api/admin/importe'],
+  ['get', '/api/admin/sicherung'],
+  ['get', '/api/admin/sicherungen'],
+  ['post', '/api/admin/wiederherstellen']
 ];
 const SCHUELER = [
   ['get', '/api/schueler/ich'],

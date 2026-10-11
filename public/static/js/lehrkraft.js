@@ -19,7 +19,8 @@
         link('#/admin/lehrkraefte', 'Lehrkräfte', st.admin && st.admin.lehrkraefteWartend ? st.admin.lehrkraefteWartend : null),
         link('#/admin/plattformen', 'Plattformen'),
         link('#/admin/verbund', 'Verbund-Aufträge', st.admin && st.admin.auftraegeFehlgeschlagen ? st.admin.auftraegeFehlgeschlagen : null),
-        link('#/admin/import', 'Datenübernahme')
+        link('#/admin/import', 'Datenübernahme'),
+        link('#/admin/sicherung', 'Sicherung')
       );
     }
     zeige($('bereiche'), teile);

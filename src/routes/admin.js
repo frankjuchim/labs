@@ -4,7 +4,7 @@
 const express = require('express');
 const V = require('../validate');
 
-function adminRoutes({ svc, ctx }) {
+function adminRoutes({ svc, ctx, nachWiederherstellung = () => {} }) {
   const r = express.Router();
   const id = (req) => V.int(req.params.id, 'ID');
 
@@ -56,6 +56,26 @@ function adminRoutes({ svc, ctx }) {
   r.get('/auftraege', (req, res) => res.json({ auftraege: svc.verbund.auftraege() }));
   r.post('/auftraege/verarbeiten', async (req, res) => res.json({ bearbeitet: await svc.verbund.verarbeite() }));
   r.post('/auftraege/:id/wiederholen', (req, res) => res.json({ ok: svc.verbund.wiederholen(id(req)) }));
+
+  /* Sicherung */
+  r.get('/sicherung', (req, res) => {
+    const d = svc.sicherung.exportieren();
+    res.set('Content-Disposition', `attachment; filename="infolabs-sicherung_${d.erstellt.slice(0, 10)}.json"`);
+    res.json(d);
+  });
+  r.post('/wiederherstellen', (req, res) => {
+    const b = req.body || {};
+    if (b.bestaetigung !== 'WIEDERHERSTELLEN') throw new V.ValidationError('Zur Bestätigung „WIEDERHERSTELLEN“ eingeben.');
+    const r2 = svc.sicherung.wiederherstellen(b.daten);
+    nachWiederherstellung();
+    req.abmelden();
+    res.json({ ok: true, ...r2 });
+  });
+  r.get('/sicherungen', (req, res) => res.json({ sicherungen: svc.sicherung.liste(), aktiv: !!ctx.sicherungsDir }));
+  r.get('/sicherungen/:name', (req, res) => {
+    res.set('Content-Disposition', `attachment; filename="${req.params.name}"`);
+    res.sendFile(svc.sicherung.datei(req.params.name));
+  });
 
   /* Datenübernahme (§11) */
   r.post('/import', (req, res) => {

@@ -400,5 +400,62 @@ IL.admin = (() => {
     );
   }
 
-  return { lehrkraefte, plattformen, verbund, import: importAnsicht };
+  /* ---------- Sicherung ---------- */
+
+  async function sicherung(ziel) {
+    const { sicherungen, aktiv } = await api('GET', '/api/admin/sicherungen');
+    const kb = (n) => (n < 1024 * 1024 ? Math.max(1, Math.round(n / 1024)) + ' KB' : (n / 1024 / 1024).toFixed(1).replace('.', ',') + ' MB');
+    const datei = h('input', { type: 'file', accept: 'application/json,.json', required: true, 'aria-label': 'Sicherungsdatei' });
+    const wieder = h(
+      'form',
+      { class: 'karte', style: { borderTop: '4px solid var(--rot)' } },
+      h('h2', null, 'Sicherung wiederherstellen'),
+      h('p', { class: 'leise' }, 'Ersetzt alle Daten des Portals (Konten, Kurse, Plattformen, Aufträge) durch den Stand der Datei. Alle Anmeldungen enden, auch Ihre. Konten, die nach der Sicherung angelegt wurden, fehlen danach im Portal – ihre Daten auf den Plattformen bleiben bestehen. Die Kennungen (sub, Kurs-ID) werden nie doppelt vergeben.'),
+      h('div', { class: 'feld' }, h('label', null, 'Sicherungsdatei (JSON)'), datei),
+      h('button', { class: 'knopf rot', type: 'submit' }, 'Wiederherstellen …')
+    );
+    beimAbsenden(wieder, async () => {
+      const f = datei.files && datei.files[0];
+      if (!f) throw new Error('Bitte eine Datei wählen.');
+      let daten;
+      try {
+        daten = JSON.parse(await f.text());
+      } catch {
+        throw new Error('Die Datei ist kein gültiges JSON.');
+      }
+      const b = await dialog({ titel: 'Alle Daten ersetzen?', text: 'Zur Bestätigung WIEDERHERSTELLEN eingeben.', eingabe: 'WIEDERHERSTELLEN', ok: 'Wiederherstellen', gefahr: true });
+      if (b === null) return;
+      const r = await api('POST', '/api/admin/wiederherstellen', { daten, bestaetigung: b.trim() });
+      await dialog({ titel: 'Wiederhergestellt', text: `Lehrkräfte: ${r.anzahl.lehrkraefte}, Schüler: ${r.anzahl.schueler}, Kurse: ${r.anzahl.kurse}. Bitte neu anmelden.`, ok: 'Zur Anmeldung', abbrechen: 'Schließen' });
+      location.href = '/#lehrkraft';
+    });
+    zeige(
+      ziel,
+      h('h1', null, 'Sicherung'),
+      h(
+        'section',
+        { class: 'karte' },
+        h('h2', null, 'Sicherung herunterladen'),
+        h('p', { class: 'leise' }, 'Alle Konten (mit Passwort-Hashes), Kurse, Codes, Plattformen und Freischaltungen als JSON-Datei. Vertraulich aufbewahren – nicht per E-Mail verschicken. Der Signaturschlüssel ist nicht enthalten; er liegt in /app/data/portal-schluessel.pem.'),
+        h('a', { class: 'knopf', href: '/api/admin/sicherung', download: 'infolabs-sicherung.json' }, 'Sicherung jetzt herunterladen')
+      ),
+      h(
+        'section',
+        { class: 'karte' },
+        h('h2', null, 'Automatische Sicherungen'),
+        aktiv
+          ? [
+              h('p', { class: 'leise' }, 'Täglich eine Kopie der Datenbank im Datenverzeichnis (/app/data/sicherungen), die letzten 14 Tage. Sie schützt vor Fehlbedienung, nicht vor dem Verlust des Servers – dafür regelmäßig herunterladen.'),
+              sicherungen.length
+                ? h('div', { class: 'tabelle-huelle' }, h('table', null, h('tbody', null, sicherungen.map((s) => h('tr', null, h('td', { class: 'mono' }, s.name), h('td', null, kb(s.groesse)), h('td', null, h('a', { class: 'knopf klein hell', href: '/api/admin/sicherungen/' + encodeURIComponent(s.name), download: s.name }, 'Herunterladen')))))))
+                : h('p', { class: 'leise' }, 'Noch keine – die erste entsteht wenige Sekunden nach dem Start.'),
+              h('p', { class: 'leise klein' }, 'Eine .db-Kopie stellt man auf dem Server wieder her (Datei als /app/data/portal.db einsetzen, App neu starten).')
+            ]
+          : h('p', { class: 'leise' }, 'In dieser Umgebung abgeschaltet.')
+      ),
+      wieder
+    );
+  }
+
+  return { lehrkraefte, plattformen, verbund, import: importAnsicht, sicherung };
 })();

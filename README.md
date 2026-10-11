@@ -29,7 +29,7 @@ Ziel-Adresse: **https://labs.frankjuchim.de** (CapRover-App `labs`).
 | **Öffentlich** | Übersicht aller Plattformen aus ihren Manifesten (Name, Themenfeld, Farbe, Gastmodus, Themenseite); zentrale Datenschutzerklärung `/datenschutz` |
 | **Schüler** | Beitritt mit **Kurscode + selbst gewähltem Namen** → persönlicher Code `ABC-234` (Buchstaben ohne I/O, Ziffern 2–9, kursübergreifend eindeutig); Weiterlernen mit Name + Code; **ein Konto für mehrere Kurse** (weiterem Kurs per Kurscode beitreten); Seite „Meine Plattformen“ mit „Weiter zu …“ (SSO) |
 | **Lehrkraft** | Zugang anfragen, nach Freigabe anmelden; Kurse anlegen (Kurscode, Beitritts-Link, QR-Code, Ablaufdatum, Plattformen – nur freigeschaltete); Schülerliste mit Codes (umbenennen, neuer Code, entfernen, Codeliste drucken); **Mitlehrkräfte** per Einladung; Kennzahlen der Plattformen je Kurs |
-| **Superadmin** | Lehrkräfte freigeben/ablehnen/deaktivieren, Einmal-Passwort, **Freischaltung je Plattform**, löschen; **Plattformen** per Basis-URL eintragen, Manifest gegen den Vertrag prüfen, Rücksprung-Adresse (Whitelist) bestätigen, Status/Version, vorläufige Einträge ohne Manifest; öffentlichen Schlüssel anzeigen; **Verbund-Aufträge** überwachen; **Datenübernahme** aus Algo Quest |
+| **Superadmin** | Lehrkräfte freigeben/ablehnen/deaktivieren, Einmal-Passwort, **Freischaltung je Plattform**, löschen; **Plattformen** per Basis-URL eintragen, Manifest gegen den Vertrag prüfen, Rücksprung-Adresse (Whitelist) bestätigen, Status/Version, vorläufige Einträge ohne Manifest; öffentlichen Schlüssel anzeigen; **Verbund-Aufträge** überwachen; **Datenübernahme** aus Algo Quest; **Sicherung** herunterladen und wiederherstellen |
 
 Weitere Regeln:
 
@@ -84,9 +84,9 @@ src/
   jwt.js            Ed25519-JWT signieren/prüfen, jti-Speicher – zum Kopieren in Plattformen gedacht
   schluessel.js     Portal-Schlüssel aus PORTAL_PRIVATE_KEY
   validate.js       Eingaben (Namen, Codes, URLs, Datum)
-  wartung.js        Ablauf, Aufträge wiederholen, Plattformen prüfen
+  wartung.js        tägliche Sicherung, Ablauf, Aufträge wiederholen, Plattformen prüfen
   routes/           oeffentlich, schueler, lehrkraft, admin, sso
-  services/         konten, kurse, loeschung, plattformen, sso, verbund, import
+  services/         konten, kurse, loeschung, plattformen, sso, verbund, import, sicherung
 public/             index.html (Übersicht + Anmeldung + SSO-Anmeldung), schueler.html, lehrkraft.html (inkl. Superadmin),
                     datenschutz.html; static/js (common, start, schueler, lehrkraft, admin), static/css/portal.css
 scripts/            vertrag_pruefen.js (aus Algo Quest), schluessel_erzeugen.js
@@ -135,6 +135,14 @@ Die GitHub-Prüfung (`.github/workflows/pruefung.yml`) führt bei jedem Push Tes
 5. Deploy nur nach Freigabe: `git fetch origin main && git merge-base --is-ancestor origin/main HEAD && git push origin HEAD:main`,
    danach `/healthz` auf die neue Version prüfen. Nicht während des Unterrichts deployen.
 
+**Sicherung:** Superadmin → *Sicherung*: JSON-Sicherung aller Konten, Kurse, Codes, Plattformen und Freischaltungen
+herunterladen (enthält Passwort-Hashes – vertraulich aufbewahren) bzw. wiederherstellen (ersetzt alles; alle
+Sitzungen enden; `sub`/Kurs-IDs werden danach nie unter dem bisherigen Höchststand vergeben; der Superadmin kommt
+wieder aus `ADMIN_EMAIL`/`ADMIN_PASSWORD`). Zusätzlich legt das Portal täglich eine Kopie der Datenbank in
+`/app/data/sicherungen/` an (letzte 14 Tage) – Schutz vor Fehlbedienung, nicht vor Verlust des Servers; dafür
+regelmäßig herunterladen. Der Signaturschlüssel `/app/data/portal-schluessel.pem` ist in keiner Sicherung enthalten:
+beim Umzug auf einen neuen Server mitnehmen (sonst brauchen alle Plattformen den neuen öffentlichen Schlüssel).
+
 **Schlüsselwechsel:** neues Paar erzeugen, öffentlichen Schlüssel zuerst bei allen Plattformen hinterlegen, dann
 `PORTAL_PRIVATE_KEY` tauschen (Vertrag §5: neuen öffentlichen Schlüssel zuerst bei allen Plattformen ergänzen – `PORTAL_PUBLIC_KEY` darf mehrere PEM-Blöcke enthalten).
 
@@ -163,7 +171,7 @@ Alle Antworten JSON; schreibende Anfragen mit `Content-Type: application/json` u
 | SSO | `GET /sso/autorisieren?plattform&ruecksprung&state&ziel` · `GET /sso/abbrechen?…` · `GET /sso/abmelden?ruecksprung` · `GET /sso/schluessel.pem` |
 | Schüler | `GET /api/schueler/ich` · `POST /api/schueler/kurse {kurscode}` |
 | Lehrkraft (`/api/lehrkraft`) | `/ich` · `/passwort` · `/plattformen` · `/kurse` (GET, POST) · `/kurse/:id` (GET, PATCH `{name?, beitrittOffen?, ablauf?, plattformen?}`, DELETE `{bestaetigung}`) · `/kurse/:id/neuer-kurscode` · `/kurse/:id/qr.svg` · `/kurse/:id/schueler` (+ `/:sid` PATCH/DELETE, `/:sid/neuer-code`) · `/kurse/:id/einladungen` · `/kurse/:id/lehrkraefte/:lid` (DELETE) · `/einladungen` · `/kurse/:id/uebersicht/:plattform` |
-| Superadmin (`/api/admin`) | `/uebersicht` · `/lehrkraefte` (+ `/:id/status`, `/:id/einmalpasswort`, `/:id/plattformen` PUT, DELETE) · `/plattformen` (POST `{basis}`, `/vorlaeufig`, `/:pid/pruefen`, PATCH `{ruecksprung?, aktiv?, reihenfolge?, angaben?}`, DELETE) · `/schluessel` · `/auftraege` (+ `/verarbeiten`, `/:id/wiederholen`) · `/import {daten, probelauf}` · `/importe` (+ `/:id/zuordnung.json`) |
+| Superadmin (`/api/admin`) | `/uebersicht` · `/lehrkraefte` (+ `/:id/status`, `/:id/einmalpasswort`, `/:id/plattformen` PUT, DELETE) · `/plattformen` (POST `{basis}`, `/vorlaeufig`, `/:pid/pruefen`, PATCH `{ruecksprung?, aktiv?, reihenfolge?, angaben?}`, DELETE) · `/schluessel` · `/auftraege` (+ `/verarbeiten`, `/:id/wiederholen`) · `/import {daten, probelauf}` · `/importe` (+ `/:id/zuordnung.json`) · `/sicherung` · `/wiederherstellen {daten, bestaetigung: "WIEDERHERSTELLEN"}` · `/sicherungen` (+ `/:name`) |
 
 ---
 

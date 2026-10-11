@@ -22,6 +22,7 @@ if (!privateKeyPem) {
 
 const app = createApp({
   dbFile: path.join(DATA_DIR, 'portal.db'),
+  sicherungsDir: path.join(DATA_DIR, 'sicherungen'),
   sessionSecret: process.env.SESSION_SECRET,
   portalUrl: process.env.PORTAL_URL,
   adminEmail: process.env.ADMIN_EMAIL || 'admin',

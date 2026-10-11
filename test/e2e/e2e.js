@@ -117,6 +117,9 @@ async function main() {
     await admin.check('tr:has-text("lehrkraft@schule.example") >> label:has-text("Testlabor") >> input');
     await admin.waitForSelector('text=Testlabor: freigeschaltet');
     await bild(admin, 'superadmin_lehrkraefte.png');
+    await admin.goto(portalUrl + '/lehrkraft#/admin/sicherung');
+    await admin.waitForSelector('text=Sicherung jetzt herunterladen');
+    await bild(admin, 'superadmin_sicherung.png');
 
     /* 4. Lehrkraft legt einen Kurs an */
     await lk.click('#tab-lehrkraft');

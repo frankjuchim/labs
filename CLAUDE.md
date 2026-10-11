@@ -42,7 +42,7 @@ node scripts/vertrag_pruefen.js <URL>                     # Manifest einer laufe
 src/app.js, server.js, db.js (Migrationen nur anhängen), security.js (= Algo Quest), jwt.js (portabel), schluessel.js,
     validate.js, wartung.js
 src/routes/      oeffentlich, schueler, lehrkraft, admin, sso
-src/services/    konten, kurse, loeschung, plattformen, sso, verbund, import
+src/services/    konten, kurse, loeschung, plattformen, sso, verbund, import, sicherung
 public/          index.html (Übersicht/Anmeldung/SSO), schueler.html, lehrkraft.html (+ Superadmin), datenschutz.html, 404.html
 scripts/         vertrag_pruefen.js (unverändert aus Algo Quest), schluessel_erzeugen.js
 test/            *.test.js, helpers.js, testplattform/ (Mini-Plattform „Testlabor“), e2e/e2e.js
@@ -90,7 +90,8 @@ docs/            INTEGRATION.md, screenshots/
 
 ### Qualitätssicherung (vor jedem Commit)
 - `npm test` grün; bei Oberflächenänderungen zusätzlich `npm run e2e` und die Screenshots ansehen.
-- Schema-Änderungen nur als neue Migration in `src/db.js`.
+- Schema-Änderungen nur als neue Migration in `src/db.js`; neue Tabellen auch in `TABELLEN` (`services/sicherung.js`)
+  aufnehmen, sonst fehlen sie in der Sicherung.
 
 ## Offene Punkte
 - AlgoQuest-README Teil H auf einen Verweis auf `VERTRAG.md` kürzen (nur mit Genehmigung, im AlgoQuest-Repo).

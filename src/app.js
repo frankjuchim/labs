@@ -30,6 +30,7 @@ const SCHUELER_SITZUNG_MS = 30 * 24 * 3600 * 1000; // 30 Tage
  * @param {Function} [opts.fetch]           fetch für Aufrufe an Plattformen (Tests)
  * @param {boolean} [opts.erlaubeHttp]      Plattformen auch über http:// (nur Entwicklung/Tests)
  * @param {boolean} [opts.verbundAutomatisch] Aufträge sofort abarbeiten (Standard true)
+ * @param {string|null} [opts.sicherungsDir] Ordner für tägliche Datenbank-Kopien (ohne → keine)
  * @param {string|number|boolean} [opts.trustProxy]
  * @param {Function} [opts.log]
  * @param {Function} [opts.now]             Uhr (ms) – für Tests
@@ -64,6 +65,7 @@ function createApp(opts) {
     schluesselFehler,
     fetch: opts.fetch || globalThis.fetch,
     erlaubeHttp: !!opts.erlaubeHttp,
+    sicherungsDir: opts.sicherungsDir || null,
     verbundAutomatisch: opts.verbundAutomatisch !== false
   };
   const svc = createServices(ctx);
@@ -142,7 +144,7 @@ function createApp(opts) {
   /* ---------- API ---------- */
 
   // Datenübernahme: große JSON-Datei (Algo-Quest-Backup) – eigener Parser vor dem allgemeinen
-  app.use('/api/admin/import', S.sameOriginCheck, express.json({ limit: '80mb' }));
+  app.use(['/api/admin/import', '/api/admin/wiederherstellen'], S.sameOriginCheck, express.json({ limit: '80mb' }));
   app.use('/api', S.sameOriginCheck, express.json({ limit: '200kb' }));
   app.use('/api', (req, res, next) => {
     res.set('Cache-Control', 'no-store');
@@ -151,7 +153,9 @@ function createApp(opts) {
   app.use('/api', oeffentlicheRoutes({ svc, ctx, superadminAktiv, version: VERSION }));
   app.use('/api/schueler', schuelerRoutes({ svc }));
   app.use('/api/lehrkraft', lehrkraftRoutes({ svc }));
-  app.use('/api/admin', adminRoutes({ svc, ctx }));
+  // nach dem Wiederherstellen: Superadmin wieder aus der Umgebung setzen (Passwort aus ADMIN_PASSWORD)
+  const nachWiederherstellung = () => svc.konten.sichereSuperadmin(opts.adminEmail || 'admin', opts.adminPassword || '');
+  app.use('/api/admin', adminRoutes({ svc, ctx, nachWiederherstellung }));
   app.use('/api', (req, res) => res.status(404).json({ error: 'Unbekannte Anfrage.' }));
 
   /* ---------- Seiten ---------- */

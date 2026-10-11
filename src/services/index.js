@@ -8,6 +8,7 @@ const { createKonten } = require('./konten');
 const { createKurse } = require('./kurse');
 const { createSso } = require('./sso');
 const { createImport } = require('./import');
+const { createSicherung } = require('./sicherung');
 
 function createServices(ctx) {
   const verbund = createVerbund(ctx);
@@ -17,7 +18,8 @@ function createServices(ctx) {
   const kurse = createKurse(ctx, { konten, plattformen, verbund, loeschung });
   const sso = createSso(ctx, { konten, plattformen });
   const importe = createImport(ctx, { konten, kurse, plattformen });
-  return { verbund, plattformen, loeschung, konten, kurse, sso, importe };
+  const sicherung = createSicherung(ctx);
+  return { verbund, plattformen, loeschung, konten, kurse, sso, importe, sicherung };
 }
 
 module.exports = { createServices };
