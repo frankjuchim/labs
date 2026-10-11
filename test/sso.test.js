@@ -53,7 +53,7 @@ async function holeRuecksprung(b, ziel = '/') {
 
 const decode = (t) => JSON.parse(Buffer.from(t.split('.')[1], 'base64url').toString('utf8'));
 
-test('Schüler: Plattform → Portal (Anmeldung) → Plattform, Token exakt nach H.5', async () => {
+test('Schüler: Plattform → Portal (Anmeldung) → Plattform, Token exakt nach §5', async () => {
   const b = new H.Browser();
   const vorher = await schueler('Lena S.');
   // neuer Browser ohne Portal-Sitzung: Weiterleitung zur Anmeldeseite

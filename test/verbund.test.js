@@ -1,5 +1,5 @@
 'use strict';
-// Verbund-API (Portal → Plattform, H.6) und Plattform-Verwaltung (H.7, H.12) gegen die Test-Plattform.
+// Verbund-API (Portal → Plattform, §6) und Plattform-Verwaltung (§7, §12) gegen die Test-Plattform.
 const { test, before, after } = require('node:test');
 const assert = require('node:assert/strict');
 const crypto = require('node:crypto');

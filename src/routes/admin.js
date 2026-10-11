@@ -26,7 +26,8 @@ function adminRoutes({ svc, ctx }) {
       plattformen: n('SELECT COUNT(*) AS n FROM plattformen'),
       auftraegeFehlgeschlagen: n("SELECT COUNT(*) AS n FROM verbund_auftraege WHERE status = 'fehlgeschlagen'"),
       auftraegeOffen: n("SELECT COUNT(*) AS n FROM verbund_auftraege WHERE status = 'offen'"),
-      schluessel: !!ctx.schluessel
+      schluessel: !!ctx.schluessel,
+      schluesselFehler: ctx.schluesselFehler
     });
   });
 
@@ -47,7 +48,7 @@ function adminRoutes({ svc, ctx }) {
 
   /* Schlüssel (öffentlicher Teil zum Verteilen) */
   r.get('/schluessel', (req, res) => {
-    if (!ctx.schluessel) return res.json({ aktiv: false });
+    if (!ctx.schluessel) return res.json({ aktiv: false, fehler: ctx.schluesselFehler });
     res.json({ aktiv: true, kid: ctx.schluessel.kid, pem: ctx.schluessel.pem, iss: ctx.portalUrl, url: ctx.portalUrl + '/sso/schluessel.pem' });
   });
 
@@ -56,7 +57,7 @@ function adminRoutes({ svc, ctx }) {
   r.post('/auftraege/verarbeiten', async (req, res) => res.json({ bearbeitet: await svc.verbund.verarbeite() }));
   r.post('/auftraege/:id/wiederholen', (req, res) => res.json({ ok: svc.verbund.wiederholen(id(req)) }));
 
-  /* Datenübernahme (H.11) */
+  /* Datenübernahme (§11) */
   r.post('/import', (req, res) => {
     const b = req.body || {};
     res.json(svc.importe.ausfuehren(b.daten, { probelauf: b.probelauf === true }));

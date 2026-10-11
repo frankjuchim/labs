@@ -7,7 +7,7 @@ const APP_KENNUNG = 'infolabs-portal';
 
 /**
  * Migrationen: Index + 1 = Schema-Version. Nie bestehende Einträge ändern, nur neue anhängen.
- * IDs mit AUTOINCREMENT, damit `sub` (l:<n>, s:<n>, a:<n>) und Kurs-IDs (k:<n>) nie neu vergeben werden (Vertrag H.2).
+ * IDs mit AUTOINCREMENT, damit `sub` (l:<n>, s:<n>, a:<n>) und Kurs-IDs (k:<n>) nie neu vergeben werden (Vertrag §2).
  */
 const MIGRATIONEN = [
   `
@@ -98,7 +98,7 @@ const MIGRATIONEN = [
     vorlaeufig   INTEGER NOT NULL DEFAULT 0,  -- 1 = ohne (gültiges) Manifest, nur Link, kein SSO
     aktiv        INTEGER NOT NULL DEFAULT 1,  -- 0 = vom Superadmin abgeschaltet (kein SSO, nicht öffentlich)
     reihenfolge  INTEGER NOT NULL DEFAULT 100,
-    ruecksprung  TEXT,                        -- exakte SSO-Rücksprung-Adresse (Whitelist, H.5)
+    ruecksprung  TEXT,                        -- exakte SSO-Rücksprung-Adresse (Whitelist, §5)
     angaben      TEXT NOT NULL,               -- JSON: Anzeige-Angaben (aus dem Manifest oder von Hand)
     manifest     TEXT,                        -- JSON: zuletzt gültiges Manifest
     pruefung     TEXT,                        -- JSON: { ok, fehler[], warnungen[], healthz, at }
@@ -114,7 +114,7 @@ const MIGRATIONEN = [
     PRIMARY KEY (lehrkraft_id, plattform_id)
   );
 
-  -- Plattformen eines Kurses; aktiv = 0 heißt: abgeschaltet (Kurs bleibt auf der Plattform bekannt, H.6)
+  -- Plattformen eines Kurses; aktiv = 0 heißt: abgeschaltet (Kurs bleibt auf der Plattform bekannt, §6)
   CREATE TABLE kurs_plattformen (
     kurs_id      INTEGER NOT NULL REFERENCES kurse(id) ON DELETE CASCADE,
     plattform_id TEXT NOT NULL REFERENCES plattformen(id) ON DELETE CASCADE,
@@ -133,7 +133,7 @@ const MIGRATIONEN = [
     PRIMARY KEY (sub, plattform_id)
   );
 
-  -- Aufträge an Plattformen (Verbund-API, H.6) mit Wiederholung bei Ausfall
+  -- Aufträge an Plattformen (Verbund-API, §6) mit Wiederholung bei Ausfall
   CREATE TABLE verbund_auftraege (
     id                INTEGER PRIMARY KEY AUTOINCREMENT,
     plattform_id      TEXT NOT NULL,
@@ -151,7 +151,7 @@ const MIGRATIONEN = [
   );
   CREATE INDEX idx_va_offen ON verbund_auftraege(status, naechster_versuch);
 
-  -- Datenübernahmen (H.11): Bericht + Zuordnung alt → neu
+  -- Datenübernahmen (§11): Bericht + Zuordnung alt → neu
   CREATE TABLE importe (
     id         INTEGER PRIMARY KEY AUTOINCREMENT,
     quelle     TEXT NOT NULL,

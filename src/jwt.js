@@ -1,5 +1,5 @@
 'use strict';
-// Kompakte JWT mit Ed25519 (alg „EdDSA“) – nur Node-Bordmittel (crypto.sign/verify), Vertrag H.5/H.6.
+// Kompakte JWT mit Ed25519 (alg „EdDSA“) – nur Node-Bordmittel (crypto.sign/verify), Vertrag §5/§6.
 // Diese Datei ist so geschrieben, dass Plattformen sie unverändert übernehmen können (siehe docs/INTEGRATION.md).
 
 const crypto = require('node:crypto');
@@ -34,10 +34,13 @@ function pruefe(token, publicKey, { iss, aud, maxDauerSek = 120, jetztSek = Math
   }
   if (!kopf || kopf.alg !== 'EdDSA') return { ok: false, grund: 'alg' };
   let gueltig = false;
-  try {
-    gueltig = crypto.verify(null, Buffer.from(`${teile[0]}.${teile[1]}`), publicKey, Buffer.from(teile[2], 'base64url'));
-  } catch {
-    gueltig = false;
+  for (const key of schluesselListe(publicKey)) {
+    try {
+      gueltig = crypto.verify(null, Buffer.from(`${teile[0]}.${teile[1]}`), key, Buffer.from(teile[2], 'base64url'));
+    } catch {
+      gueltig = false;
+    }
+    if (gueltig) break;
   }
   if (!gueltig) return { ok: false, grund: 'signatur' };
   if (!nutzlast || typeof nutzlast !== 'object') return { ok: false, grund: 'format' };
@@ -50,6 +53,17 @@ function pruefe(token, publicKey, { iss, aud, maxDauerSek = 120, jetztSek = Math
   if (nutzlast.exp <= jetztSek) return { ok: false, grund: 'abgelaufen' };
   if (typeof nutzlast.jti !== 'string' || nutzlast.jti.length < 16 || nutzlast.jti.length > 200) return { ok: false, grund: 'jti' };
   return { ok: true, nutzlast };
+}
+
+/**
+ * Öffentliche Schlüssel als Liste: KeyObject, PEM (auch mehrere Blöcke, auch einzeilig mit „\\n“) oder Liste davon.
+ * Mehrere Schlüssel erlauben einen Schlüsselwechsel ohne Ausfall (Vertrag §5).
+ */
+function schluesselListe(k) {
+  if (Array.isArray(k)) return k.flatMap(schluesselListe);
+  if (k instanceof crypto.KeyObject) return [k];
+  const text = String(k || '').replace(/\\n/g, '\n');
+  return (text.match(/-----BEGIN PUBLIC KEY-----[\s\S]*?-----END PUBLIC KEY-----/g) || []).map((pem) => crypto.createPublicKey(pem));
 }
 
 /** Merkt sich verwendete jti bis zu ihrem Ablauf (im Speicher). merke() liefert false, wenn schon verwendet. */
@@ -72,4 +86,4 @@ function schluesselKennung(publicKey) {
   return crypto.createHash('sha256').update(der).digest('base64url').slice(0, 16);
 }
 
-module.exports = { signiere, pruefe, JtiSpeicher, schluesselKennung };
+module.exports = { signiere, pruefe, JtiSpeicher, schluesselKennung, schluesselListe };

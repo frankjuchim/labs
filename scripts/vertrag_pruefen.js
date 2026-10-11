@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 'use strict';
-// Prüft eine Plattform gegen den Verbundvertrag (README Teil H, Vertrag v1).
+// Prüft eine Plattform gegen den Verbundvertrag (VERTRAG.md im Repo frankjuchim/labs, Hauptversion 1).
+// Maßgebliche Fassung: frankjuchim/labs/scripts/vertrag_pruefen.js.
 // Aufruf: node scripts/vertrag_pruefen.js https://algoquest.frankjuchim.de   (oder http://localhost:3000)
 // Ohne Netz nutzbar als Modul: const { pruefeManifest } = require('./scripts/vertrag_pruefen');
-// Diese Datei darf (wie README Teil H) unverändert in jede Plattform des Verbunds kopiert werden.
+// Diese Datei wird unverändert in jede Plattform des Verbunds kopiert.
 
 const VERTRAG_HAUPTVERSION = 1;
 const URL_SCHLUESSEL = ['start', 'gast', 'themen', 'lehrkraft', 'datenschutz', 'healthz'];

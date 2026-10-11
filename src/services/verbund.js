@@ -1,5 +1,5 @@
 'use strict';
-// Verbund-API (Vertrag H.6): signierte Aufrufe Portal → Plattform.
+// Verbund-API (Vertrag §6): signierte Aufrufe Portal → Plattform.
 // Schreibende Aufrufe (Löschung, Kursänderung) laufen als Auftrag mit Wiederholung, damit nichts verloren geht,
 // wenn eine Plattform gerade nicht erreichbar ist. Lesende Aufrufe (Kursübersicht) laufen sofort.
 
@@ -11,7 +11,7 @@ const WARTEN_MIN = [1, 5, 30, 120, 360, 720, 1440, 1440, 1440, 1440];
 const TIMEOUT_MS = 10000;
 const MAX_ANTWORT = 512 * 1024;
 
-/** Zweck-Namen der Verbund-Endpunkte (Feld `zweck` im Token, Vorschlag v1.1 in docs/VERTRAG_VORSCHLAEGE.md). */
+/** Zweck-Namen der Verbund-Endpunkte (Feld `zweck` im Token, Vertrag v1.1 in VERTRAG.md). */
 const ZWECK = { loeschen: 'loeschen', uebersicht: 'kurs-uebersicht', kurs: 'kurs-aendern' };
 
 function createVerbund(ctx) {

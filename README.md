@@ -43,31 +43,34 @@ Weitere Regeln:
 
 ## 2. Verbund
 
-Verbindlich für Portal und Plattformen ist der **Vertrag v1** in
-[`frankjuchim/AlgoQuest`, README Teil H „Der Plattform-Verbund“](https://github.com/frankjuchim/AlgoQuest#h-der-plattform-verbund--vertrag-v1):
-Rollen (H.4), Single Sign-on mit Ed25519-JWT (H.5), Verbund-API (H.6), Plattform-Manifest (H.7), Konfiguration (H.8),
-gemeinsame Regeln (H.9), Datenschutz (H.10), Übergang Algo Quest (H.11).
+**Verbindlich für Portal und Plattformen ist der Vertrag [`VERTRAG.md`](VERTRAG.md) (Version 1.1)** in diesem
+Repository. Er löst README Teil H im Repo `frankjuchim/AlgoQuest` ab (Abschnittsnummern gleich: §n = H.n) und regelt
+Rollen (§4), Single Sign-on mit Ed25519-JWT (§5), Verbund-API (§6), Plattform-Manifest (§7), Konfiguration (§8),
+gemeinsame Regeln (§9), Datenschutz (§10) und den Übergang bestehender Plattformen (§11). Änderungen nur dort, mit neuer
+Version und Eintrag in §14.
+
+**Verweis aus einer neuen Plattform** (README und CLAUDE.md):
+„Verbindlich ist der Vertrag des Plattform-Verbunds: https://github.com/frankjuchim/labs/blob/main/VERTRAG.md
+(Version 1.1); Anschluss nach https://github.com/frankjuchim/labs/blob/main/docs/INTEGRATION.md.“
 
 | Thema | Umsetzung im Portal |
 |---|---|
 | Konten, `sub` | `a:<n>` Superadmin, `l:<n>` Lehrkraft, `s:<n>` Schüler, Kurs-IDs `k:<n>` – nie neu vergeben (`AUTOINCREMENT`) |
-| SSO (H.5) | `GET /sso/autorisieren` → Token (EdDSA, `exp − iat = 90 s`, `jti` zufällig 128 bit) an die freigegebene Rücksprung-Adresse; `GET /sso/abbrechen`; `GET /sso/abmelden` |
-| Schlüssel | privat nur in `PORTAL_PRIVATE_KEY`; öffentlich unter `/sso/schluessel.pem` und `/api/portal/schluessel` sowie im Superadmin-Bereich |
-| Verbund-API (H.6) | Löschung (`loeschen`), Kursänderung (`kurs-aendern`) als Aufträge mit Wiederholung; Kursübersicht (`kurs-uebersicht`) sofort |
-| Manifest (H.7, H.12) | `scripts/vertrag_pruefen.js` unverändert aus Algo Quest; Prüfung beim Eintragen, auf Knopfdruck und alle 6 h |
-| Übergang (H.11) | Import des Algo-Quest-Backups: Lehrkräfte mit scrypt-Hash, Kurse mit Kurscode, Schüler mit Name + Code – Codes unverändert; Zuordnung alt → neu als JSON |
+| SSO (§5) | `GET /sso/autorisieren` → Token (EdDSA, `exp − iat = 90 s`, `jti` zufällig 128 bit) an die freigegebene Rücksprung-Adresse; `GET /sso/abbrechen`; `GET /sso/abmelden` |
+| Schlüssel | privat nur auf dem Server (`/app/data/portal-schluessel.pem` bzw. `PORTAL_PRIVATE_KEY`); öffentlich unter `/sso/schluessel.pem` und `/api/portal/schluessel` sowie im Superadmin-Bereich |
+| Verbund-API (§6) | Löschung (`loeschen`), Kursänderung (`kurs-aendern`) als Aufträge mit Wiederholung; Kursübersicht (`kurs-uebersicht`) sofort |
+| Manifest (§7, §12) | `scripts/vertrag_pruefen.js` (maßgebliche Fassung); Prüfung beim Eintragen, auf Knopfdruck und alle 6 h |
+| Übergang (§11) | Import des Algo-Quest-Backups: Lehrkräfte mit scrypt-Hash, Kurse mit Kurscode, Schüler mit Name + Code – Codes unverändert; Zuordnung alt → neu als JSON |
 
 - **Anschluss einer Plattform:** [`docs/INTEGRATION.md`](docs/INTEGRATION.md) – Schritt für Schritt mit Testfällen.
-  Referenz: die Test-Plattform [`test/testplattform/`](test/testplattform/app.js).
-- **Vorschläge für Vertrag v1.1** (Lücken, die beim Bau aufgefallen sind, und Umzug des Vertrags hierher):
-  [`docs/VERTRAG_VORSCHLAEGE.md`](docs/VERTRAG_VORSCHLAEGE.md). Bis zur Freigabe gilt v1.0; das Portal bleibt dazu
-  kompatibel.
+  Referenz: die Test-Plattform [`test/testplattform/`](test/testplattform/app.js); Bausteine zum Kopieren:
+  [`src/jwt.js`](src/jwt.js), [`scripts/vertrag_pruefen.js`](scripts/vertrag_pruefen.js).
 
 Bekannte Plattformen:
 
 | Plattform | ID | Stand |
 |---|---|---|
-| Algo Quest | `algoquest` | Manifest vertragsgemäß (2.5.0), Anmeldung noch lokal (`AUTH_MODUS=lokal`) – nächster Schritt: Phase 1 nach `docs/INTEGRATION.md` |
+| Algo Quest | `algoquest` | Manifest vertragsgemäß (2.5.0), Anmeldung noch lokal (`AUTH_MODUS=lokal`) – nächster Schritt: Phase 1 nach `docs/INTEGRATION.md`; README Teil H dort auf Verweis kürzen |
 | AutomatenLab | `automatenlab` | noch kein Manifest und kein Login → vorläufiger Eintrag |
 
 ## 3. Aufbau
@@ -88,7 +91,8 @@ public/             index.html (Übersicht + Anmeldung + SSO-Anmeldung), schuele
                     datenschutz.html; static/js (common, start, schueler, lehrkraft, admin), static/css/portal.css
 scripts/            vertrag_pruefen.js (aus Algo Quest), schluessel_erzeugen.js
 test/               node:test + supertest; testplattform/ (Mini-Plattform „Testlabor“); e2e/e2e.js (Playwright)
-docs/               INTEGRATION.md, VERTRAG_VORSCHLAEGE.md, screenshots/ (vom E2E-Durchlauf erzeugt)
+docs/               INTEGRATION.md, screenshots/ (vom E2E-Durchlauf erzeugt)
+VERTRAG.md          Vertrag des Plattform-Verbunds (maßgeblich)
 ```
 
 Gestaltung: Hausfarben #1F4E79 (primär), Gold #B8860B, Grün #548235, Rot #C00000, Kasten #DBE7F5; Systemschrift, keine
@@ -99,12 +103,12 @@ externen Ressourcen; Touch-Ziele ≥ 44 px, Tastaturbedienung, Druckansicht für
 ```bash
 npm install
 npm run dev            # Portal auf http://localhost:3100, Superadmin admin / admin1234, Daten in ./data,
-                       # Entwicklungsschlüssel wird in ./data erzeugt
+                       # Signaturschlüssel wird in ./data erzeugt
 PORTAL_URL=http://localhost:3100 npm run testplattform   # Testlabor auf http://localhost:4100 (im Portal eintragen)
 npm test               # Unit-/API-/SSO-/Verbund-Tests (node:test + supertest, Portal + Testlabor auf echten Ports)
 npm run e2e            # Browser-Durchlauf (Chromium unter /opt/pw-browsers bzw. CHROMIUM_PATH), Screenshots → docs/screenshots
 npm run pruefen        # beides
-npm run schluessel     # neues Ed25519-Schlüsselpaar für den Betrieb
+npm run schluessel     # optional: eigenes Ed25519-Schlüsselpaar (sonst erzeugt das Portal selbst einen)
 ```
 
 Die GitHub-Prüfung (`.github/workflows/pruefung.yml`) führt bei jedem Push Tests, Browser-Durchlauf und Docker-Build aus.
@@ -118,24 +122,27 @@ Die GitHub-Prüfung (`.github/workflows/pruefung.yml`) führt bei jedem Push Tes
    | Variable | Bedeutung |
    |---|---|
    | `PORTAL_URL` | `https://labs.frankjuchim.de` – Pflicht, ist `iss` aller Tokens |
-   | `PORTAL_PRIVATE_KEY` | Ed25519-Schlüssel (PKCS#8-PEM, einzeilig mit `\n`), erzeugen mit `npm run schluessel`; ohne → kein SSO, keine Verbund-API |
+   | `PORTAL_PRIVATE_KEY` | **leer lassen (empfohlen):** Das Portal erzeugt beim ersten Start einen Ed25519-Schlüssel in `DATA_DIR/portal-schluessel.pem` (Rechte 600) und nutzt ihn danach immer wieder – der private Schlüssel verlässt den Server nie. Optional: eigener Schlüssel aus `npm run schluessel` (kompakt `MC4CAQAw…` oder PEM). Ein ungültiger Wert (z. B. OpenSSH-Schlüssel aus `ssh-keygen`) legt das Portal nicht lahm, schaltet aber SSO ab; der Superadmin sieht den Grund |
    | `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Superadmin (Standard-Login `admin`); Passwort wird bei jedem Start gesetzt, ohne Passwort ist der Superadmin-Login gesperrt |
    | `SESSION_SECRET` | langer Zufallswert (≥ 16 Zeichen) für die Cookies |
    | `PORT` / `DATA_DIR` / `TRUST_PROXY` | Standard `80` / `/app/data` / `1` |
 
-3. Den öffentlichen Schlüssel (Superadmin → Plattformen) als `PORTAL_PUBLIC_KEY` bei den Plattformen eintragen.
+3. Den öffentlichen Schlüssel (Superadmin → Plattformen, oder `https://labs.frankjuchim.de/sso/schluessel.pem`) als
+   `PORTAL_PUBLIC_KEY` bei den Plattformen eintragen. **Wichtig:** Die Datei `/app/data/portal-schluessel.pem` gehört
+   zum Datenbestand – geht sie verloren, entsteht ein neuer Schlüssel und alle Plattformen brauchen den neuen
+   öffentlichen Schlüssel. In Sicherungen von `/app/data` ist sie enthalten; sie ist geheim zu halten.
 4. Healthcheck `GET /healthz` → `{"status":"ok","version":"…"}`.
 5. Deploy nur nach Freigabe: `git fetch origin main && git merge-base --is-ancestor origin/main HEAD && git push origin HEAD:main`,
    danach `/healthz` auf die neue Version prüfen. Nicht während des Unterrichts deployen.
 
 **Schlüsselwechsel:** neues Paar erzeugen, öffentlichen Schlüssel zuerst bei allen Plattformen hinterlegen, dann
-`PORTAL_PRIVATE_KEY` tauschen (siehe Vorschlag 2 in `docs/VERTRAG_VORSCHLAEGE.md`).
+`PORTAL_PRIVATE_KEY` tauschen (Vertrag §5: neuen öffentlichen Schlüssel zuerst bei allen Plattformen ergänzen – `PORTAL_PUBLIC_KEY` darf mehrere PEM-Blöcke enthalten).
 
 ## 6. Datenschutz und Sicherheit
 
 - Gespeichert: Schüler nur mit selbst gewähltem Namen, persönlichem Code, Kursen und Zeitstempeln; Lehrkräfte mit Name,
   E-Mail, Schule, Nachricht, scrypt-Hash. Keine Klarnamen in Beispieldaten, Tests oder Screenshots.
-- Plattformen erhalten nur `sub`, Rolle, Anzeigenamen und Kurse (H.5); vom Portal fließen nie Codes oder Passwörter.
+- Plattformen erhalten nur `sub`, Rolle, Anzeigenamen und Kurse (§5); vom Portal fließen nie Codes oder Passwörter.
   Die Kursübersicht liefert nur Kennzahlen. Die zentrale Datenschutzerklärung (`/datenschutz`) enthält Platzhalter in
   `[…]` für die Angaben der Schule.
 - Strikte CSP ohne Inline-Skripte, Ausgaben nur als Textknoten, `X-Robots-Tag: noindex`, keine CDNs.

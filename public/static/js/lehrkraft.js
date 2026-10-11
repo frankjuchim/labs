@@ -23,6 +23,7 @@
       );
     }
     zeige($('bereiche'), teile);
+    if (st.admin && !st.admin.schluessel) $('bereiche').appendChild(h('p', { class: 'hinweis rot klein', style: { width: '100%', margin: '0.4rem 0 0' } }, 'Single Sign-on ist abgeschaltet: ', st.admin.schluesselFehler || 'kein Schlüssel.', ' ', h('a', { href: '#/admin/plattformen' }, 'Details')));
   }
 
   async function route() {

@@ -1,8 +1,8 @@
-# Eine Plattform an InfoLabs anschließen (Phase 1 nach Vertrag H.11)
+# Eine Plattform an InfoLabs anschließen (Phase 1 nach Vertrag §11)
 
 Diese Anleitung beschreibt Schritt für Schritt, was eine Plattform des Verbunds (z. B. Algo Quest) tun muss, damit
 sich Lehrkräfte und Schüler über das Portal **https://labs.frankjuchim.de** anmelden und das Portal Löschungen und
-Kursänderungen weitergeben kann. Verbindlich ist der Vertrag (README Teil H in `frankjuchim/AlgoQuest`); diese Datei
+Kursänderungen weitergeben kann. Verbindlich ist der Vertrag [`VERTRAG.md`](../VERTRAG.md) (Version 1.1); diese Datei
 setzt ihn um und nennt die Werte des Portals. Eine lauffähige Referenz ist die **Test-Plattform**
 `test/testplattform/app.js` (rund 250 Zeilen) – jede Prüfung dort muss auch die echte Plattform machen.
 
@@ -11,7 +11,7 @@ setzt ihn um und nennt die Werte des Portals. Eine lauffähige Referenz ist die 
 
 ---
 
-## 1. Konfiguration (H.8)
+## 1. Konfiguration (§8)
 
 | Variable | Wert für den Verbund |
 |---|---|
@@ -24,17 +24,17 @@ setzt ihn um und nennt die Werte des Portals. Eine lauffähige Referenz ist die 
 Den Schlüssel **nicht** zur Laufzeit vom Portal holen, sondern fest konfigurieren – sonst könnte ein Angreifer, der
 DNS oder das Portal stört, einen eigenen Schlüssel unterschieben.
 
-## 2. Manifest ergänzen (H.7)
+## 2. Manifest ergänzen (§7)
 
 ```js
-urls: { …, ssoStart: '/sso/start', ssoEnde: '/sso/ende' },   // ssoEnde: Vorschlag v1.1, siehe VERTRAG_VORSCHLAEGE.md
+urls: { …, ssoStart: '/sso/start', ssoEnde: '/sso/ende' },   // ssoEnde: KANN (ab v1.1)
 auth: { modus: 'beides', portal: process.env.PORTAL_URL, sso: true }
 ```
 
 Das Portal zeigt `basis + urls.ssoStart` als Link „Weiter zu …“ für Schüler; `urls.ssoEnde` schlägt es dem Superadmin
 als Rücksprung-Adresse vor.
 
-## 3. SSO-Empfänger (H.5)
+## 3. SSO-Empfänger (§5)
 
 Den Baustein `src/jwt.js` aus diesem Repository **unverändert kopieren** (nur `node:crypto`): `pruefe(token, publicKey,
 { iss, aud, maxDauerSek })` prüft Aufbau, `alg = EdDSA`, Signatur, `v = 1`, `iss`, `aud`, `iat`/`exp`
@@ -85,9 +85,9 @@ Inhalt eines Tokens (Beispiel, `exp − iat = 90 s`):
 
 Knopf „Abmelden“ beendet nur die Plattform-Sitzung. Knopf „Überall abmelden“: Sitzung beenden und weiterleiten auf
 `PORTAL_URL/sso/abmelden?ruecksprung=<PLATTFORM_URL>/` (das Portal leitet nur auf eingetragene Plattformen zurück).
-In der Kopfzeile ein Link **„⌂ Portal“** auf `PORTAL_URL` (H.9).
+In der Kopfzeile ein Link **„⌂ Portal“** auf `PORTAL_URL` (§9).
 
-## 4. Verbund-API (H.6)
+## 4. Verbund-API (§6)
 
 Jede Anfrage trägt `Authorization: Bearer <JWT>` mit `iss = PORTAL_URL`, `aud = PLATTFORM_ID`, `sub = "portal"`,
 `exp − iat ≤ 60 s` (das Portal stellt 60 s aus), einmaligem `jti` und `zweck`:
@@ -102,7 +102,7 @@ Prüfung: `pruefe(token, PORTAL_PUBLIC_KEY, { iss: PORTAL_URL, aud: PLATTFORM_ID
 `sub === 'portal'`, `zweck` passt zum Endpunkt, `jti` einmalig (eigener `JtiSpeicher`). Sonst **401** ohne Details.
 Diese Endpunkte brauchen **keine** Origin-Prüfung (kein Browser beteiligt), aber JSON und ein Rate-Limit.
 
-Kursübersicht (Format, Vorschlag v1.1) – **keine** Antworten, Lösungen oder Freitexte:
+Kursübersicht (Format nach §6) – **keine** Antworten, Lösungen oder Freitexte:
 
 ```json
 { "kurs": "k:17", "stand": "2026-10-11T10:00:00Z",
@@ -110,13 +110,13 @@ Kursübersicht (Format, Vorschlag v1.1) – **keine** Antworten, Lösungen oder 
   "welten":   [{ "nr": 0, "titel": "Die Akademie", "anteil": 0.55 }] }
 ```
 
-`anteil` ist der Anteil an den Level-Punkten der freigeschalteten Welten (0…1, wie die Rangschwellen in H.9).
+`anteil` ist der Anteil an den Level-Punkten der freigeschalteten Welten (0…1, wie die Rangschwellen in §9).
 Das Portal zeigt nur `sub`s, die Mitglied des Kurses sind, und ergänzt die Namen selbst.
 
 Das Portal sendet Aufträge nur an Plattformen, deren Manifest `auth.modus` = `beides` oder `portal` meldet; bei
 Fehlern (Netz, 5xx, 401) wiederholt es nach 1, 5, 30 Minuten … bis etwa 6 Tage.
 
-## 5. Testfälle (H.12) – müssen in den Tests der Plattform stehen
+## 5. Testfälle (§12) – müssen in den Tests der Plattform stehen
 
 | Fall | Erwartung |
 |---|---|

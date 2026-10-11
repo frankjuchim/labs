@@ -13,9 +13,12 @@ Ziel: https://labs.frankjuchim.de (CapRover, `captain-definition` + `Dockerfile`
 
 ## Verbindliche Grundlage
 
-- **Vertrag v1 = README Teil H im Repo `frankjuchim/AlgoQuest`** (Rollen H.4, SSO H.5, Verbund-API H.6, Manifest H.7,
-  Konfiguration H.8, gemeinsame Regeln H.9, Datenschutz H.10, Übergang H.11). Nie still abweichen: Änderungen als
-  konkreten Text mit neuer Versionsnummer und H.14-Eintrag vorschlagen (`docs/VERTRAG_VORSCHLAEGE.md`) und Frank fragen.
+- **Vertrag = [`VERTRAG.md`](VERTRAG.md) in diesem Repo (Version 1.1, maßgeblich für Portal und alle Plattformen;
+  §n entspricht dem früheren README Teil H.n in AlgoQuest).** Rollen §4, SSO §5, Verbund-API §6, Manifest §7,
+  Konfiguration §8, gemeinsame Regeln §9, Datenschutz §10, Übergang §11. Nie still abweichen: Änderungen nur in
+  `VERTRAG.md`, mit Frank abgestimmt, neuer Versionsnummer und Eintrag in §14 – erst den Vertrag ändern, dann bauen.
+- `scripts/vertrag_pruefen.js` und `src/jwt.js` sind die maßgeblichen Fassungen, die Plattformen unverändert kopieren;
+  Änderungen daran sind Vertragsänderungen.
 - Die Plattform-Repos (`frankjuchim/AlgoQuest`, `frankjuchim/AutomatenLab`) werden aus diesem Repo heraus **nicht**
   geändert – nur mit ausdrücklicher Genehmigung. Was Plattformen tun müssen, steht in `docs/INTEGRATION.md`.
 - Stil, Arbeitsweise und Sicherheitsregeln wie in Algo Quest (dortige CLAUDE.md und README Teil F, G.4).
@@ -27,7 +30,7 @@ npm install
 npm test                 # node:test + supertest (inkl. SSO/Verbund Ende-zu-Ende mit der Test-Plattform)
 npm run e2e              # Playwright-Durchlauf (Chromium /opt/pw-browsers, kein `playwright install`), Screenshots → docs/screenshots
 npm run pruefen          # test + e2e
-npm run dev              # Port 3100, Superadmin admin / admin1234, Daten ./data, Entwicklungsschlüssel
+npm run dev              # Port 3100, Superadmin admin / admin1234, Daten ./data (Signaturschlüssel dort)
 PORTAL_URL=http://localhost:3100 npm run testplattform   # Testlabor auf Port 4100
 npm run schluessel       # Ed25519-Schlüsselpaar für den Betrieb
 node scripts/vertrag_pruefen.js <URL>                     # Manifest einer laufenden Plattform prüfen
@@ -43,14 +46,15 @@ src/services/    konten, kurse, loeschung, plattformen, sso, verbund, import
 public/          index.html (Übersicht/Anmeldung/SSO), schueler.html, lehrkraft.html (+ Superadmin), datenschutz.html, 404.html
 scripts/         vertrag_pruefen.js (unverändert aus Algo Quest), schluessel_erzeugen.js
 test/            *.test.js, helpers.js, testplattform/ (Mini-Plattform „Testlabor“), e2e/e2e.js
-docs/            INTEGRATION.md, VERTRAG_VORSCHLAEGE.md, screenshots/
+VERTRAG.md       Vertrag des Plattform-Verbunds (maßgeblich)
+docs/            INTEGRATION.md, screenshots/
 ```
 
 ## Konventionen
 
 ### Sprache
 - Alles auf Deutsch (Code-Bezeichner, Kommentare, Commit-Messages, UI, Doku).
-- Schüler werden **geduzt**, Lehrkräfte **gesiezt**. Begriffe nach H.9: „Kurs“, „Kurscode“, „persönlicher Code“,
+- Schüler werden **geduzt**, Lehrkräfte **gesiezt**. Begriffe nach §9: „Kurs“, „Kurscode“, „persönlicher Code“,
   „Lehrkraft“, „Plattform“, „Portal“; keine XP.
 
 ### Konten und Codes (nicht ändern ohne Vertragsänderung)
@@ -61,7 +65,7 @@ docs/            INTEGRATION.md, VERTRAG_VORSCHLAEGE.md, screenshots/
 - Ein Schüler = ein Konto für mehrere Kurse. Schüler ohne Kurs werden gelöscht (Kurs löschen, aus Kurs entfernen, Ablauf).
 
 ### SSO und Verbund
-- Token-Inhalt **exakt** nach H.5 (`iss, aud, sub, rolle, name, kurse, iat, exp, jti, v`), `exp − iat = 90 s` (≤ 120),
+- Token-Inhalt **exakt** nach §5 (`iss, aud, sub, rolle, name, kurse, iat, exp, jti, v`), `exp − iat = 90 s` (≤ 120),
   Verbund-Tokens 60 s mit `sub: "portal"` und `zweck` ∈ `loeschen | kurs-uebersicht | kurs-aendern`.
 - Rücksprung zeichengenau aus der Whitelist (`plattformen.ruecksprung`); bei ungültiger Anfrage Fehlerseite, **nie** weiterleiten.
 - Jede Löschung im Portal stößt `POST /api/verbund/loeschen` auf allen betroffenen Plattformen an (Aufträge mit
@@ -74,7 +78,7 @@ docs/            INTEGRATION.md, VERTRAG_VORSCHLAEGE.md, screenshots/
   „Mika R.“ und `@schule.example`).
 - Keine externen Ressourcen/CDNs, keine Inline-Skripte/-Styles (CSP), Ausgaben nur als DOM-Textknoten (`IL.h`),
   kein `innerHTML` (Test `seiten.test.js`).
-- Privater Schlüssel nur in `PORTAL_PRIVATE_KEY`, nie committen, nie loggen; Tokens nie loggen.
+- Privater Schlüssel nur auf dem Server: `DATA_DIR/portal-schluessel.pem` (automatisch, Standard) oder `PORTAL_PRIVATE_KEY`; nie committen, nie loggen, nie in Chats; Tokens nie loggen.
 - Plattformen bekommen nie persönliche Codes oder Passwörter; die Kursübersicht zeigt nur Kennzahlen.
 - Neue Endpunkte: Rechte für jede Rolle testen (`rechte.test.js`), Fehlertexte auf Deutsch, ohne Details.
 
@@ -89,8 +93,7 @@ docs/            INTEGRATION.md, VERTRAG_VORSCHLAEGE.md, screenshots/
 - Schema-Änderungen nur als neue Migration in `src/db.js`.
 
 ## Offene Punkte
-- Vertrag v1.1 (`docs/VERTRAG_VORSCHLAEGE.md`) mit Frank abstimmen; danach Umzug des Vertrags nach `VERTRAG.md`.
+- AlgoQuest-README Teil H auf einen Verweis auf `VERTRAG.md` kürzen (nur mit Genehmigung, im AlgoQuest-Repo).
 - Algo Quest Phase 1 (SSO-Empfänger, Verbund-API, `AUTH_MODUS=beides`) nach `docs/INTEGRATION.md` – im AlgoQuest-Repo.
 - AutomatenLab: Manifest `/api/plattform` + `/healthz` (bis dahin vorläufiger Eintrag).
 - `public/datenschutz.html`: Angaben in `[…]` von der Schule ergänzen lassen.
-- Mehrere öffentliche Schlüssel (Schlüsselwechsel) in `jwt.pruefe` unterstützen, sobald v1.1 freigegeben ist.

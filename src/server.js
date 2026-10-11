@@ -4,17 +4,20 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { createApp, VERSION } = require('./app');
-const { devSchluessel } = require('./schluessel');
+const { dateiSchluessel } = require('./schluessel');
 
 const PORT = Number(process.env.PORT) || 80;
 const DATA_DIR = process.env.DATA_DIR || '/app/data';
 fs.mkdirSync(DATA_DIR, { recursive: true });
 
 const log = (m) => console.log(`[${new Date().toISOString()}] ${m}`);
-let privateKeyPem = process.env.PORTAL_PRIVATE_KEY || '';
-if (!privateKeyPem && process.env.PORTAL_DEV_SCHLUESSEL === '1') {
-  privateKeyPem = devSchluessel(DATA_DIR);
-  log('Entwicklung: Schlüssel aus ' + path.join(DATA_DIR, 'dev-portal-schluessel.pem'));
+// Signaturschlüssel: PORTAL_PRIVATE_KEY hat Vorrang; ohne Variable erzeugt bzw. nutzt das Portal einen Schlüssel
+// im persistenten Datenverzeichnis (DATA_DIR/portal-schluessel.pem).
+let privateKeyPem = (process.env.PORTAL_PRIVATE_KEY || '').trim();
+if (!privateKeyPem) {
+  const k = dateiSchluessel(DATA_DIR);
+  privateKeyPem = k.pem;
+  log(`Signaturschlüssel ${k.neu ? 'neu erzeugt' : 'geladen'}: ${k.datei}`);
 }
 
 const app = createApp({

@@ -1,5 +1,5 @@
 'use strict';
-// Datenübernahme aus Algo Quest (H.11): Hashes bleiben gültig, Kurscodes und persönliche Codes unverändert,
+// Datenübernahme aus Algo Quest (§11): Hashes bleiben gültig, Kurscodes und persönliche Codes unverändert,
 // Zuordnung alt → neu, idempotent, Probelauf. Beispieldaten ohne Klarnamen.
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
@@ -132,7 +132,7 @@ test('Import: unbekanntes Format und Nicht-Superadmin werden abgelehnt', async (
   assert.equal((await lk.post('/api/admin/import').send({ daten: aqBackup() })).status, 403);
 });
 
-test('Import im Verbund-Exportformat (Vorschlag v1.1)', async () => {
+test('Import im Verbund-Exportformat (Vertrag v1.1)', async () => {
   const app = H.makeApp();
   const admin = await H.adminClient(app);
   const daten = {

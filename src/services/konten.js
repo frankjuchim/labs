@@ -7,7 +7,7 @@ const S = require('../security');
 
 const { ValidationError, NotFoundError, ForbiddenError, ConflictError } = V;
 
-/** sub nach Vertrag H.2 */
+/** sub nach Vertrag §2 */
 const subLehrkraft = (r) => (r.rolle === 'superadmin' ? 'a:' : 'l:') + r.id;
 const subSchueler = (id) => 's:' + id;
 

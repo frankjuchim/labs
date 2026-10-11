@@ -15,7 +15,7 @@ const { createWartung } = require('./wartung');
 
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
 const VERSION = require('../package.json').version;
-const LEHRKRAFT_SITZUNG_MS = 8 * 3600 * 1000; // 8 Stunden (wie Algo Quest, Vertrag H.5)
+const LEHRKRAFT_SITZUNG_MS = 8 * 3600 * 1000; // 8 Stunden (wie Algo Quest, Vertrag §5)
 const SCHUELER_SITZUNG_MS = 30 * 24 * 3600 * 1000; // 30 Tage
 
 /**
@@ -41,8 +41,19 @@ function createApp(opts) {
   if (!/^https?:\/\/[^/]+$/.test(portalUrl)) throw new Error('PORTAL_URL fehlt oder ist ungültig (z. B. https://labs.frankjuchim.de).');
   const db = openDatabase(opts.dbFile, { log });
   let schluessel = null;
-  if (opts.privateKeyPem) schluessel = ladeSchluessel(opts.privateKeyPem);
-  else log('Hinweis: PORTAL_PRIVATE_KEY fehlt – Single Sign-on und Verbund-API sind abgeschaltet.');
+  let schluesselFehler = null;
+  if (opts.privateKeyPem) {
+    try {
+      schluessel = ladeSchluessel(opts.privateKeyPem);
+    } catch (e) {
+      // Das Portal (Konten, Kurse) läuft weiter; SSO und Verbund-API bleiben aus, bis der Schlüssel stimmt.
+      schluesselFehler = e.message;
+      log('FEHLER: ' + e.message + ' Single Sign-on und Verbund-API sind abgeschaltet.');
+    }
+  } else {
+    schluesselFehler = 'PORTAL_PRIVATE_KEY fehlt.';
+    log('Hinweis: PORTAL_PRIVATE_KEY fehlt – Single Sign-on und Verbund-API sind abgeschaltet.');
+  }
 
   const ctx = {
     db,
@@ -50,6 +61,7 @@ function createApp(opts) {
     now: opts.now || (() => Date.now()),
     portalUrl,
     schluessel,
+    schluesselFehler,
     fetch: opts.fetch || globalThis.fetch,
     erlaubeHttp: !!opts.erlaubeHttp,
     verbundAutomatisch: opts.verbundAutomatisch !== false

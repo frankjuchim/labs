@@ -1,5 +1,5 @@
 'use strict';
-// Single Sign-on nach Vertrag H.5: /sso/autorisieren prüft Plattform, Rücksprung-Adresse (Whitelist) und Berechtigung
+// Single Sign-on nach Vertrag §5: /sso/autorisieren prüft Plattform, Rücksprung-Adresse (Whitelist) und Berechtigung
 // und stellt ein einmal verwendbares, kurzlebiges Token (Ed25519-JWT) aus.
 
 const crypto = require('node:crypto');
@@ -42,7 +42,7 @@ function createSso(ctx, { konten, plattformen }) {
   /** Ablehnung bzw. Abbruch (nur nach erfolgreicher Prüfung der Rücksprung-Adresse). */
   const fehlerUrl = (a, fehler) => zurueck(a, { fehler, state: a.state });
 
-  /** Kurse für das Token: nur Kurse, die diese Plattform freigeschaltet haben (H.5). */
+  /** Kurse für das Token: nur Kurse, die diese Plattform freigeschaltet haben (§5). */
   function kurseFuer(konto, pid) {
     if (konto.typ === 'schueler') {
       return db

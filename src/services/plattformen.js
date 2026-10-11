@@ -48,7 +48,7 @@ function createPlattformen(ctx) {
   }
 
   /**
-   * Plattform unter `basis` prüfen: Manifest (Pflichtfelder nach H.7 via pruefeManifest), Pflicht-URLs, /healthz.
+   * Plattform unter `basis` prüfen: Manifest (Pflichtfelder nach §7 via pruefeManifest), Pflicht-URLs, /healthz.
    * Liefert { ok, fehler[], warnungen[], manifest|null, healthz|null, at }.
    */
   async function pruefeBasis(basis) {

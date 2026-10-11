@@ -154,7 +154,7 @@ IL.admin = (() => {
               h('span', { class: 'leise klein' }, `Kennung ${schluessel.kid} · fest abrufbar unter `, h('a', { href: schluessel.url }, schluessel.url))
             )
           ]
-        : h('p', { class: 'hinweis rot' }, 'Kein Schlüssel konfiguriert: PORTAL_PRIVATE_KEY fehlt. Single Sign-on und Verbund-API sind abgeschaltet. Schlüssel erzeugen mit „npm run schluessel“.')
+        : h('p', { class: 'hinweis rot' }, `Kein gültiger Schlüssel: ${schluessel.fehler || 'PORTAL_PRIVATE_KEY fehlt.'} Single Sign-on und Verbund-API sind abgeschaltet. Neues Paar erzeugen mit „npm run schluessel“ und PORTAL_PRIVATE_KEY in CapRover ersetzen.`)
     );
 
     /* Eintragen */
@@ -187,7 +187,7 @@ IL.admin = (() => {
     zeige(
       ziel,
       h('h1', null, 'Plattformen'),
-      h('section', { class: 'karte' }, h('h2', null, 'Plattform eintragen'), h('p', { class: 'leise' }, 'Das Portal ruft /api/plattform ab und prüft das Manifest gegen den Vertrag (README Teil H in Algo Quest).'), eintragen, vorlaeufigZiel),
+      h('section', { class: 'karte' }, h('h2', null, 'Plattform eintragen'), h('p', { class: 'leise' }, 'Das Portal ruft /api/plattform ab und prüft das Manifest gegen den Vertrag (VERTRAG.md in frankjuchim/labs).'), eintragen, vorlaeufigZiel),
       liste.length ? liste.map((p) => plattformKarte(p, neu)) : h('p', { class: 'leer karte' }, 'Noch keine Plattform eingetragen.'),
       schluesselBox
     );
@@ -295,7 +295,7 @@ IL.admin = (() => {
     zeige(
       ziel,
       h('h1', null, 'Verbund-Aufträge'),
-      h('p', { class: 'leise' }, 'Löschungen und Kursänderungen an die Plattformen (Vertrag H.6). Nicht erreichbare Plattformen werden automatisch erneut versucht (bis etwa 6 Tage).'),
+      h('p', { class: 'leise' }, 'Löschungen und Kursänderungen an die Plattformen (Vertrag §6). Nicht erreichbare Plattformen werden automatisch erneut versucht (bis etwa 6 Tage).'),
       h('div', { class: 'zeile' }, h('button', { type: 'button', class: 'knopf klein', onclick: () => api('POST', '/api/admin/auftraege/verarbeiten').then((r) => (meldung(`${r.bearbeitet} Auftrag/Aufträge bearbeitet.`, 'gut'), neuLaden()), fehler) }, 'Fällige jetzt abarbeiten')),
       h(
         'div',
@@ -356,7 +356,7 @@ IL.admin = (() => {
         h('li', null, 'Plattform „algoquest“ hier eintragen (Plattformen), damit Lehrkräfte und Kurse automatisch freigeschaltet werden.'),
         h('li', null, 'In Algo Quest als Superadmin die Sicherung (Backup, JSON) herunterladen.'),
         h('li', null, 'Datei hier wählen, zuerst als Probelauf, dann richtig übernehmen. Genutzt werden nur Lehrkräfte (mit Passwort-Hash), Kurse (mit Kurscode) und Schüler (Name + Code) – Lernstände werden nicht gelesen oder gespeichert.'),
-        h('li', null, 'Die Zuordnung alt → neu (sub, Kurs-ID) herunterladen und an Algo Quest übergeben (Vertrag H.11, Phase 2).')
+        h('li', null, 'Die Zuordnung alt → neu (sub, Kurs-ID) herunterladen und an Algo Quest übergeben (Vertrag §11, Phase 2).')
       ),
       h('div', { class: 'feld' }, h('label', null, 'Sicherungsdatei (JSON)'), datei),
       h('label', { class: 'haken' }, probe, 'Nur Probelauf (nichts speichern)'),

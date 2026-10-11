@@ -1,5 +1,5 @@
 'use strict';
-// SSO-Endpunkte nach Vertrag H.5: /sso/autorisieren, /sso/abbrechen, /sso/abmelden, /sso/schluessel.pem.
+// SSO-Endpunkte nach Vertrag §5: /sso/autorisieren, /sso/abbrechen, /sso/abmelden, /sso/schluessel.pem.
 
 const express = require('express');
 const S = require('../security');

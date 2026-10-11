@@ -106,7 +106,7 @@ function kursCode(value) {
   return v;
 }
 
-/** Plattform-ID nach Vertrag H.2. */
+/** Plattform-ID nach Vertrag §2. */
 function plattformId(value) {
   if (typeof value !== 'string' || !/^[a-z][a-z0-9-]{1,30}$/.test(value)) throw new ValidationError('Plattform-ID ungültig (a–z, 0–9, „-“, 2–31 Zeichen).');
   return value;

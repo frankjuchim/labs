@@ -80,6 +80,8 @@ async function main() {
     await admin.click('text=Manifest abrufen und eintragen');
     await admin.waitForSelector('text=Vorschlag');
     await admin.click('button:has-text("Vorschlag")');
+    // warten, bis die Seite nach dem Speichern neu aufgebaut ist (sonst landet die Eingabe im alten Formular)
+    await admin.waitForSelector('text=Noch nicht freigegeben', { state: 'detached' });
     await admin.waitForSelector('.ampel.ok');
     // Plattform ohne Manifest (hier: nicht erreichbar, ohne Netz) → vorläufiges Formular
     await admin.fill('input[name="basis"]', 'http://localhost:1');

@@ -1,12 +1,12 @@
 'use strict';
-// Datenübernahme aus Algo Quest (Vertrag H.11, Phase 2): Lehrkräfte mit scrypt-Hash, Kurse mit Kurscode,
+// Datenübernahme aus Algo Quest (Vertrag §11, Phase 2): Lehrkräfte mit scrypt-Hash, Kurse mit Kurscode,
 // Schüler mit Name + persönlichem Code. Codes bleiben unverändert; das Portal vergibt sub/Kurs-IDs und liefert
 // eine Zuordnung alt → neu, mit der die Plattform ihre Lernstände umschreibt.
 //
 // Angenommen werden zwei Formate:
 //  1. das Backup von Algo Quest (Superadmin → Backup, {"app":"algoquest-lab","format":2,"tables":{…}}) – genutzt werden
 //     NUR die Tabellen lehrkraefte, kurse, schueler; Lernstände werden weder gelesen noch gespeichert;
-//  2. das Verbund-Exportformat (Vorschlag in docs/VERTRAG_VORSCHLAEGE.md): {"format":"verbund-export","version":1,…}.
+//  2. das Verbund-Exportformat (Vorschlag in VERTRAG.md): {"format":"verbund-export","version":1,…}.
 // Der Import ist idempotent (alt_quelle + alt_id): ein zweiter Lauf legt nichts doppelt an.
 
 const V = require('../validate');

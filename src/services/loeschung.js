@@ -1,5 +1,5 @@
 'use strict';
-// Löschung (Vertrag H.3/H.10): Das Portal löscht bei sich und stößt die Löschung auf allen betroffenen Plattformen an
+// Löschung (Vertrag §3/§10): Das Portal löscht bei sich und stößt die Löschung auf allen betroffenen Plattformen an
 // (POST /api/verbund/loeschen, als Auftrag mit Wiederholung). Schüler ohne Kurs werden mitgelöscht.
 
 const { subLehrkraft, subSchueler } = require('./konten');

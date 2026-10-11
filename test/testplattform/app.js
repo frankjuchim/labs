@@ -1,5 +1,5 @@
 'use strict';
-// Test-Plattform „Testlabor“: kleinste vertragsgemäße Plattform (Vertrag v1, H.5–H.7) zum Ende-zu-Ende-Prüfen des
+// Test-Plattform „Testlabor“: kleinste vertragsgemäße Plattform (VERTRAG.md v1.1, §5–§7) zum Ende-zu-Ende-Prüfen des
 // Portals. Zugleich Referenz für docs/INTEGRATION.md – jede Prüfung hier MUSS auch eine echte Plattform machen.
 // Daten liegen nur im Arbeitsspeicher. Nicht für den Betrieb gedacht.
 
@@ -60,9 +60,9 @@ function createTestplattform(o) {
     }
   };
 
-  /* ---------- Manifest und Healthcheck (H.7, H.6) ---------- */
+  /* ---------- Manifest und Healthcheck (§7, §6) ---------- */
   const manifest = () => ({
-    vertrag: '1.0',
+    vertrag: '1.1',
     id,
     name: 'Testlabor',
     titel: 'Testlabor – Prüfstand für den Verbund',
@@ -89,7 +89,7 @@ function createTestplattform(o) {
     res.type('text').send(k ? `Angemeldet als ${k.name} (${k.rolle})\n` : 'Nicht angemeldet\n');
   });
 
-  /* ---------- SSO (H.5) ---------- */
+  /* ---------- SSO (§5) ---------- */
 
   // Schritt 1: Weiterleitung zum Portal mit state (≥ 128 bit) im kurzlebigen Cookie
   app.get('/sso/start', (req, res) => {
@@ -154,7 +154,7 @@ function createTestplattform(o) {
     res.json({ ok: true });
   });
 
-  /* ---------- Verbund-API (H.6): Bearer-Token vom Portal ---------- */
+  /* ---------- Verbund-API (§6): Bearer-Token vom Portal ---------- */
   function verbund(zweck) {
     return (req, res, next) => {
       const m = /^Bearer (.+)$/.exec(req.get('authorization') || '');
