@@ -3,7 +3,6 @@
 
 const express = require('express');
 const V = require('../validate');
-const { subSchueler } = require('../services/konten');
 
 function lehrkraftRoutes({ svc }) {
   const r = express.Router();
@@ -92,4 +91,4 @@ function lehrkraftRoutes({ svc }) {
   return r;
 }
 
-module.exports = { lehrkraftRoutes, subSchueler };
+module.exports = { lehrkraftRoutes };

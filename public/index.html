@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#15385A">
+<title>InfoLabs – Lernplattformen für Informatik</title>
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/css/portal.css?v=0.1.0">
+</head>
+<body>
+<a class="skip" href="#haupt">Zum Inhalt springen</a>
+<header class="kopf">
+  <div class="kopf-innen">
+    <a class="marke" href="/"><img src="/static/favicon.svg" alt=""><div><b>InfoLabs</b><span>Plattform-Verbund Informatik</span></div></a>
+    <nav id="kopf-nav" aria-label="Konto"></nav>
+  </div>
+</header>
+
+<main id="haupt">
+  <section class="buehne">
+    <div class="buehne-innen">
+      <div>
+        <h1>Informatik üben – ein Login für alle Labs</h1>
+        <p class="unterzeile">InfoLabs verbindet die Lernplattformen für den Informatikunterricht der Oberstufe (Niedersachsen, Abitur ab 2027). Du meldest dich einmal an und landest direkt in den Labs deiner Kurse.</p>
+        <ul class="vorteile">
+          <li>Beitritt mit Kurscode und selbst gewähltem Namen – keine E-Mail, kein Passwort</li>
+          <li>Ein persönlicher Code für alle Plattformen und Geräte</li>
+          <li>Jede Plattform hat einen Gastmodus zum Ausprobieren</li>
+        </ul>
+      </div>
+
+      <div class="karte anmeldekarte" id="anmelden">
+        <div class="hinweis gold" id="sso-hinweis" hidden>
+          <strong>Anmeldung für <span id="sso-plattform">eine Plattform</span></strong><br>
+          <span class="klein">Nach der Anmeldung geht es automatisch zurück.</span>
+          <div><a class="textknopf" id="sso-abbrechen" href="/">Abbrechen und zurück</a></div>
+        </div>
+
+        <!-- angemeldet -->
+        <div id="angemeldet" hidden>
+          <h2>Hallo, <span id="angemeldet-name"></span>!</h2>
+          <p class="leise" id="angemeldet-text">Du bist angemeldet.</p>
+          <div class="zeile">
+            <a class="knopf gold" id="angemeldet-weiter" href="/schueler">Weiter</a>
+            <button type="button" class="textknopf" id="angemeldet-wechseln">Anderes Konto</button>
+          </div>
+          <form id="form-dazu" class="abstand" hidden>
+            <p class="hinweis">Du hast einen Kurscode bekommen: <strong id="dazu-kurs"></strong></p>
+            <button class="knopf" type="submit">Diesem Kurs beitreten</button>
+          </form>
+        </div>
+
+        <!-- persönlicher Code nach dem Beitritt -->
+        <div id="code-box" hidden aria-live="assertive">
+          <h2>Willkommen, <span id="code-name"></span>!</h2>
+          <p><strong>Notiere dir jetzt deinen persönlichen Code.</strong> Mit deinem Namen und diesem Code meldest du dich auf jedem Gerät und auf allen Plattformen an.</p>
+          <p class="mitte"><span class="code-gross" id="code-wert"></span></p>
+          <p class="klein leise">Kurs: <span id="code-kurs"></span> · Name: <span id="code-name2"></span></p>
+          <label class="haken"><input type="checkbox" id="code-ok"> Ich habe meinen Code notiert (Heft, Foto …).</label>
+          <button type="button" class="knopf gold voll" id="code-weiter" disabled>Los geht’s →</button>
+        </div>
+
+        <div id="formulare">
+          <div class="reiter" role="tablist" aria-label="Anmeldung">
+            <button type="button" role="tab" id="tab-beitreten" aria-controls="form-beitreten" aria-selected="true">Kurs beitreten</button>
+            <button type="button" role="tab" id="tab-weiter" aria-controls="form-weiter" aria-selected="false">Weiterlernen</button>
+            <button type="button" role="tab" id="tab-lehrkraft" aria-controls="bereich-lehrkraft" aria-selected="false">Lehrkraft</button>
+          </div>
+
+          <form id="form-beitreten" role="tabpanel" aria-labelledby="tab-beitreten" autocomplete="off">
+            <p class="hinweis gold klein" id="kurs-info" hidden></p>
+            <div class="feld">
+              <label for="b-kurscode">Kurscode</label>
+              <input id="b-kurscode" name="kurscode" class="code-eingabe" type="text" maxlength="8" required placeholder="z. B. K7M2QX" autocapitalize="characters" spellcheck="false">
+            </div>
+            <div class="feld">
+              <label for="b-name">Dein Name</label>
+              <input id="b-name" name="name" type="text" maxlength="30" required placeholder="Vorname + Initial, z. B. Mika R.">
+              <small>Bitte keinen vollständigen Namen – Vorname und Initial genügen.</small>
+            </div>
+            <button class="knopf gold voll" type="submit">Beitreten</button>
+          </form>
+
+          <form id="form-weiter" role="tabpanel" aria-labelledby="tab-weiter" hidden autocomplete="off">
+            <div class="feld">
+              <label for="w-name">Dein Name</label>
+              <input id="w-name" name="name" type="text" maxlength="30" required>
+            </div>
+            <div class="feld">
+              <label for="w-code">Persönlicher Code</label>
+              <input id="w-code" name="code" class="code-eingabe" type="text" maxlength="8" required placeholder="ABC-234" autocapitalize="characters" spellcheck="false">
+            </div>
+            <button class="knopf voll" type="submit">Anmelden</button>
+            <p class="klein leise abstand">Code vergessen? Deine Lehrkraft kann ihn dir nennen oder einen neuen erzeugen.</p>
+          </form>
+
+          <div id="bereich-lehrkraft" role="tabpanel" aria-labelledby="tab-lehrkraft" hidden>
+            <form id="form-lehrkraft">
+              <div class="feld">
+                <label for="l-email">E-Mail</label>
+                <input id="l-email" name="email" type="text" autocomplete="username" required>
+              </div>
+              <div class="feld">
+                <label for="l-passwort">Passwort</label>
+                <input id="l-passwort" name="passwort" type="password" autocomplete="current-password" required>
+              </div>
+              <button class="knopf voll" type="submit">Anmelden</button>
+            </form>
+            <form id="form-passwort" hidden>
+              <p class="hinweis gold">Bitte legen Sie zuerst ein eigenes Passwort fest (mindestens 10 Zeichen).</p>
+              <div class="feld">
+                <label for="p-neu">Neues Passwort</label>
+                <input id="p-neu" name="neu" type="password" autocomplete="new-password" minlength="10" required>
+              </div>
+              <button class="knopf voll" type="submit">Passwort speichern</button>
+            </form>
+            <details class="abstand" id="registrieren">
+              <summary>Noch kein Zugang? Zugang anfragen</summary>
+              <form id="form-registrieren" class="abstand">
+                <div class="feld"><label for="r-name">Name</label><input id="r-name" name="name" type="text" maxlength="80" required></div>
+                <div class="feld"><label for="r-email">Dienstliche E-Mail</label><input id="r-email" name="email" type="email" maxlength="200" required></div>
+                <div class="feld"><label for="r-schule">Schule</label><input id="r-schule" name="schule" type="text" maxlength="120" required></div>
+                <div class="feld"><label for="r-passwort">Passwort (mind. 10 Zeichen)</label><input id="r-passwort" name="passwort" type="password" minlength="10" autocomplete="new-password" required></div>
+                <div class="feld"><label for="r-nachricht">Nachricht (optional)</label><textarea id="r-nachricht" name="nachricht" maxlength="1000" placeholder="z. B. Kurs, Plattformen, die Sie nutzen möchten"></textarea></div>
+                <button class="knopf hell voll" type="submit">Anfrage senden</button>
+                <p class="klein leise abstand">Der Administrator prüft die Anfrage und schaltet die gewünschten Plattformen frei.</p>
+              </form>
+            </details>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="breit" aria-labelledby="plattformen-titel">
+    <h2 id="plattformen-titel">Die Plattformen</h2>
+    <p class="leise">Jede Plattform deckt ein Themenfeld ab – mit automatisch geprüften Aufgaben im Abitur-Stil. Im Gastmodus kannst du ohne Anmeldung reinschnuppern.</p>
+    <div class="raster" id="plattformen"><p class="leise">Wird geladen …</p></div>
+  </section>
+</main>
+
+<footer class="fuss">
+  <div class="fuss-innen">
+    <span>InfoLabs – Plattform-Verbund für den Informatikunterricht der Oberstufe</span>
+    <span><a href="/datenschutz">Datenschutz</a></span>
+  </div>
+</footer>
+<script src="/static/js/common.js?v=0.1.0"></script>
+<script src="/static/js/start.js?v=0.1.0"></script>
+</body>
+</html>

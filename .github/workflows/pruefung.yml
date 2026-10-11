@@ -1,0 +1,29 @@
+# Prüfung bei jedem Push und Pull Request.
+# Hinweis: CapRover baut die Live-App direkt bei jedem Push auf main – diese Prüfung blockiert das nicht.
+# Deshalb auf Feature-Branches arbeiten und erst nach grüner Prüfung (und Freigabe) nach main übernehmen.
+name: Prüfung
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  portal:
+    name: Tests (node:test) und Browser-Durchlauf (Playwright)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - name: Chromium für Playwright
+        run: npx playwright-core install --with-deps chromium
+      - name: Ende-zu-Ende (Portal + Test-Plattform)
+        run: npm run e2e
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: /home/runner/.cache/ms-playwright
+      - name: Docker-Image baut
+        run: docker build -t infolabs-portal .

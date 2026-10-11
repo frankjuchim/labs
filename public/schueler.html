@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#15385A">
+<title>Meine Plattformen – InfoLabs</title>
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/css/portal.css?v=0.1.0">
+</head>
+<body>
+<a class="skip" href="#haupt">Zum Inhalt springen</a>
+<header class="kopf">
+  <div class="kopf-innen">
+    <a class="marke" href="/"><img src="/static/favicon.svg" alt=""><div><b>InfoLabs</b><span>Plattform-Verbund Informatik</span></div></a>
+    <nav id="kopf-nav" aria-label="Konto"></nav>
+  </div>
+</header>
+<main id="haupt" class="breit">
+  <h1>Hallo, <span id="name">…</span>!</h1>
+  <p class="leise">Wähle eine Plattform – du wirst automatisch angemeldet.</p>
+  <div id="kurse"></div>
+
+  <div class="raster abstand">
+    <section class="karte" aria-labelledby="code-titel">
+      <h2 id="code-titel">Dein persönlicher Code</h2>
+      <p class="leise klein">Mit Name und Code meldest du dich auf jedem Gerät an. Gib den Code nicht weiter.</p>
+      <p><span class="code-gross" id="code" hidden></span></p>
+      <button type="button" class="knopf hell" id="code-zeigen">Code anzeigen</button>
+    </section>
+    <section class="karte" aria-labelledby="dazu-titel">
+      <h2 id="dazu-titel">Weiterem Kurs beitreten</h2>
+      <form id="form-dazu" autocomplete="off">
+        <div class="feld">
+          <label for="d-kurscode">Kurscode</label>
+          <input id="d-kurscode" name="kurscode" class="code-eingabe" type="text" maxlength="8" required placeholder="z. B. K7M2QX">
+        </div>
+        <button class="knopf" type="submit">Beitreten</button>
+      </form>
+    </section>
+  </div>
+</main>
+<footer class="fuss">
+  <div class="fuss-innen">
+    <span>InfoLabs – Plattform-Verbund für den Informatikunterricht der Oberstufe</span>
+    <span><a href="/datenschutz">Datenschutz</a></span>
+  </div>
+</footer>
+<script src="/static/js/common.js?v=0.1.0"></script>
+<script src="/static/js/schueler.js?v=0.1.0"></script>
+</body>
+</html>

@@ -3,7 +3,6 @@
 // und stellt ein einmal verwendbares, kurzlebiges Token (Ed25519-JWT) aus.
 
 const crypto = require('node:crypto');
-const V = require('../validate');
 const { signiere } = require('../jwt');
 const { kursId } = require('./loeschung');
 
@@ -114,7 +113,7 @@ function createSso(ctx, { konten, plattformen }) {
     return plattformen.zuUrl(ruecksprung) ? u.href : '/';
   }
 
-  return { pruefeAnfrage, entscheide, fehlerUrl, abmeldeZiel, TOKEN_DAUER_SEK, V };
+  return { pruefeAnfrage, entscheide, fehlerUrl, abmeldeZiel, TOKEN_DAUER_SEK };
 }
 
 module.exports = { createSso, TOKEN_DAUER_SEK };

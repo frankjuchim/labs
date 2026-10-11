@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#15385A">
+<title>Datenschutz – InfoLabs</title>
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/css/portal.css?v=0.1.0">
+</head>
+<body>
+<a class="skip" href="#haupt">Zum Inhalt springen</a>
+<header class="kopf">
+  <div class="kopf-innen">
+    <a class="marke" href="/"><img src="/static/favicon.svg" alt=""><div><b>InfoLabs</b><span>Plattform-Verbund Informatik</span></div></a>
+  </div>
+</header>
+<main id="haupt" class="schmal">
+  <article class="karte">
+    <h1>Datenschutzhinweise für den Plattform-Verbund „InfoLabs“</h1>
+    <p class="hinweis gold"><strong>Entwurf:</strong> Diese Hinweise beschreiben die Verarbeitung so, wie Portal und Plattformen technisch arbeiten. Die Angaben in [eckigen Klammern] und die Rechtsgrundlage müssen von der Schule (Schulleitung, Datenschutzbeauftragte bzw. Datenschutzbeauftragter) ergänzt bzw. bestätigt werden.</p>
+
+    <h2>1. Verantwortliche Stelle</h2>
+    <p>[Name der Schule], [Anschrift], vertreten durch die Schulleitung [Name].<br>
+    Datenschutzbeauftragte bzw. Datenschutzbeauftragter der Schule: [Name, E-Mail].<br>
+    Ansprechpartner für den Verbund: [Administrator, dienstliche E-Mail]; für einen Kurs die Lehrkraft des Kurses.</p>
+
+    <h2>2. Was ist InfoLabs?</h2>
+    <p>InfoLabs ist das <strong>Portal</strong> eines Verbunds von Lernplattformen für den Informatikunterricht der Oberstufe. Das Portal verwaltet die Konten, Kurse und Freischaltungen und meldet Nutzerinnen und Nutzer bei den <strong>Plattformen</strong> an (z. B. Algo Quest). Jede Plattform ist eine eigene Anwendung mit eigener Datenbank; dort liegen die Aufgaben und der Lernstand. Diese Erklärung gilt für den ganzen Verbund. Die Plattformen ergänzen auf ihrer Seite „Datenschutz“ nur ihre Besonderheiten (z. B. welche Lernstände sie speichern) und verweisen hierher.</p>
+
+    <h2>3. Zweck</h2>
+    <p>Schülerinnen und Schüler üben mit automatisch geprüften Aufgaben; die Lehrkraft sieht den Lernstand ihres Kurses, um den Unterricht zu planen. Die Ergebnisse fließen nicht in die Notengebung ein [von der Schule zu bestätigen].</p>
+
+    <h2>4. Welche Daten verarbeitet das Portal?</h2>
+    <ul>
+      <li><strong>Schülerinnen und Schüler:</strong> ein selbst gewählter Name (2–30 Zeichen; Empfehlung: Vorname + Initial, ein Spitzname ist ebenso möglich), ein zufällig erzeugter persönlicher Code, die Kurse, denen das Konto angehört, sowie Zeitpunkte (Beitritt, letzte Aktivität, erste und letzte Anmeldung je Plattform). Keine E-Mail-Adresse, kein Passwort, kein Geburtsdatum, kein vollständiger Name.</li>
+      <li><strong>Lehrkräfte:</strong> Name, dienstliche E-Mail-Adresse, Schule, eine optionale Nachricht zur Registrierung, ein Passwort (nur als scrypt-Hash gespeichert), die freigeschalteten Plattformen sowie die eigenen Kurse und Mitlehrkraft-Rollen.</li>
+      <li><strong>Kurse:</strong> Name, Kurscode, Ablaufdatum, Lehrkräfte, Mitglieder und die freigeschalteten Plattformen.</li>
+      <li><strong>Technisch:</strong> ein Sitzungs-Cookie (signiert, httpOnly, SameSite=Lax, über HTTPS „secure“) – bei Schülerinnen und Schülern 30 Tage, bei Lehrkräften 8 Stunden. Zur Begrenzung von Anmeldeversuchen wird die IP-Adresse kurzzeitig im Arbeitsspeicher gezählt (höchstens 60 Minuten) und nicht gespeichert. Keine Tracking- oder Werbe-Cookies, keine externen Schriftarten, Skripte oder CDNs; Suchmaschinen werden an der Indexierung gehindert.</li>
+    </ul>
+
+    <h2>5. Was erfährt eine Plattform?</h2>
+    <p>Bei der Anmeldung über das Portal (Single Sign-on) erhält die Plattform ein kurzlebiges, signiertes Anmeldetoken mit: einer pseudonymen Kennung (z. B. „s:1042“), der Rolle, dem gewählten Namen und den Kursen, die diese Plattform nutzen (Kennung, Name, Rolle im Kurs). Persönliche Codes, Passwörter und E-Mail-Adressen von Schülerinnen und Schülern werden nie weitergegeben. Plattformen untereinander tauschen keine Daten aus.</p>
+    <p>Das Portal fragt bei den Plattformen nur <strong>Kennzahlen</strong> für die Lehrkraft eines Kurses ab (z. B. Punkte, Zahl gelöster Aufgaben, zuletzt aktiv) – keine Antworten, Lösungen oder Freitexte.</p>
+
+    <h2>6. Sichtbarkeit</h2>
+    <ul>
+      <li>Lehrkräfte sehen nur ihre eigenen Kurse bzw. Kurse, in denen sie Mitlehrkraft sind, mit Namen und persönlichen Codes der Mitglieder.</li>
+      <li>Was andere Kursmitglieder auf einer Plattform sehen (z. B. ein Scoreboard), regelt die Plattform; die Lehrkraft schaltet es dort ein oder aus.</li>
+      <li>Der Administrator hat technischen Zugriff auf alle Daten des Portals; er gibt keine Daten an Dritte weiter.</li>
+    </ul>
+
+    <h2>7. Rechtsgrundlage</h2>
+    <p>[Von der Schule festzulegen, z. B. Art. 6 Abs. 1 lit. e DSGVO i. V. m. § 31 NSchG (Verarbeitung im Rahmen des Bildungsauftrags) oder Einwilligung nach Art. 6 Abs. 1 lit. a DSGVO.]</p>
+
+    <h2>8. Speicherort, Speicherdauer und Löschung</h2>
+    <p>Portal und Plattformen laufen auf einem Server von [Hoster, Standort in der EU]; alle Verbindungen sind mit HTTPS verschlüsselt.</p>
+    <ul>
+      <li>Jeder Kurs hat ein <strong>Ablaufdatum</strong> (Standard: 31. Juli des Schuljahres, höchstens 24 Monate im Voraus, von der Lehrkraft verlängerbar). Danach werden der Kurs und alle Schülerkonten, die keinem weiteren Kurs angehören, automatisch gelöscht – im Portal und auf allen Plattformen.</li>
+      <li>Die Lehrkraft kann jederzeit Schülerinnen und Schüler aus dem Kurs entfernen oder den Kurs löschen. Ein Schülerkonto ohne weiteren Kurs wird dabei mit seinem Lernstand auf allen Plattformen gelöscht.</li>
+      <li>Wird ein Lehrkraft-Konto gelöscht, werden auch seine Kurse gelöscht (wie oben).</li>
+      <li>Löschungen gibt das Portal sofort an die betroffenen Plattformen weiter; ist eine Plattform kurzzeitig nicht erreichbar, wird der Auftrag automatisch wiederholt.</li>
+      <li>Sicherungskopien: [z. B. keine / Aufbewahrung höchstens … Tage].</li>
+    </ul>
+
+    <h2>9. Rechte der Betroffenen</h2>
+    <p>Betroffene haben das Recht auf Auskunft, Berichtigung (z. B. Umbenennen durch die Lehrkraft), Löschung, Einschränkung der Verarbeitung und Widerspruch sowie das Recht auf Beschwerde bei der Aufsichtsbehörde: Die Landesbeauftragte für den Datenschutz Niedersachsen, Prinzenstraße 5, 30159 Hannover. Ansprechpartner ist die Lehrkraft des Kurses bzw. die oder der Datenschutzbeauftragte der Schule.</p>
+
+    <p class="leise klein">Stand: Oktober 2026 · gilt für das Portal und alle Plattformen des Verbunds</p>
+    <p><a class="knopf hell" href="/">← Zur Startseite</a></p>
+  </article>
+</main>
+</body>
+</html>
