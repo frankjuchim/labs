@@ -22,6 +22,26 @@ const IL = (() => {
     return el;
   }
 
+  /** SVG-Element erzeugen (Texte als Textknoten). */
+  function s(tag, attrs, ...kinder) {
+    const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (const [k, v] of Object.entries(attrs || {})) if (v !== null && v !== undefined && v !== false) el.setAttribute(k, String(v));
+    anhaengen(el, kinder);
+    return el;
+  }
+
+  /** Lesbare Schriftfarbe (weiß oder dunkel) auf einer Hintergrundfarbe #RRGGBB (WCAG-Leuchtdichte). */
+  function textFarbe(hex) {
+    const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || ''));
+    if (!m) return '#fff';
+    const kanal = (i) => {
+      const c = parseInt(m[1].slice(i, i + 2), 16) / 255;
+      return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+    };
+    const l = 0.2126 * kanal(0) + 0.7152 * kanal(2) + 0.0722 * kanal(4);
+    return (1.05 / (l + 0.05)) >= 4.5 ? '#fff' : '#142033';
+  }
+
   function anhaengen(el, kinder) {
     for (const c of kinder.flat(Infinity)) {
       if (c === null || c === undefined || c === false) continue;
@@ -178,5 +198,5 @@ const IL = (() => {
     return s;
   }
 
-  return { h, leeren, zeige, api, meldung, fehler, dialog, kopieren, datum, zeit, kuerzel, formDaten, beimAbsenden, kopfzeile };
+  return { h, s, textFarbe, leeren, zeige, api, meldung, fehler, dialog, kopieren, datum, zeit, kuerzel, formDaten, beimAbsenden, kopfzeile };
 })();

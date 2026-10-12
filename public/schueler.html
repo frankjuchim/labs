@@ -4,38 +4,49 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#15385A">
+<meta name="theme-color" content="#0B1B2E">
 <title>Meine Plattformen – InfoLabs</title>
 <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/static/css/portal.css?v=0.3.0">
+<link rel="stylesheet" href="/static/css/portal.css?v=0.4.0">
 </head>
 <body>
 <a class="skip" href="#haupt">Zum Inhalt springen</a>
 <header class="kopf">
   <div class="kopf-innen">
-    <a class="marke" href="/"><img src="/static/favicon.svg" alt=""><div><b>InfoLabs</b><span>Plattform-Verbund Informatik</span></div></a>
+    <a class="marke" href="/"><img src="/static/favicon.svg" alt=""><div><b>Info<i>Labs</i></b><span>Plattform-Verbund Informatik</span></div></a>
     <nav id="kopf-nav" aria-label="Konto"></nav>
   </div>
 </header>
-<main id="haupt" class="breit">
-  <h1>Hallo, <span id="name">…</span>!</h1>
-  <p class="leise">Wähle eine Plattform – du wirst automatisch angemeldet.</p>
-  <div id="kurse"></div>
+<main id="haupt">
+  <section class="buehne begruessung">
+    <div class="buehne-innen">
+      <div>
+        <p class="vorzeile">Meine Labs</p>
+        <h1>Hallo, <span class="akzent" id="name">…</span>!</h1>
+        <p class="unterzeile">Wähle eine Plattform – du wirst automatisch angemeldet.</p>
+      </div>
+      <div class="codepille" aria-labelledby="code-titel">
+        <span class="klein" id="code-titel">Dein persönlicher Code</span>
+        <span class="code" id="code" hidden></span>
+        <span class="code" id="code-verdeckt" aria-hidden="true">•••-•••</span>
+        <button type="button" class="textknopf" id="code-zeigen">Code anzeigen</button>
+      </div>
+    </div>
+  </section>
 
-  <div class="raster abstand">
-    <section class="karte" aria-labelledby="code-titel">
-      <h2 id="code-titel">Dein persönlicher Code</h2>
-      <p class="leise klein">Mit Name und Code meldest du dich auf jedem Gerät an. Gib den Code nicht weiter.</p>
-      <p><span class="code-gross" id="code" hidden></span></p>
-      <button type="button" class="knopf hell" id="code-zeigen">Code anzeigen</button>
-    </section>
-    <section class="karte" aria-labelledby="dazu-titel">
-      <h2 id="dazu-titel">Weiterem Kurs beitreten</h2>
-      <form id="form-dazu" autocomplete="off">
-        <div class="feld">
-          <label for="d-kurscode">Kurscode</label>
-          <input id="d-kurscode" name="kurscode" class="code-eingabe" type="text" maxlength="8" required placeholder="z. B. K7M2QX">
+  <div class="breit">
+    <div id="kurse"></div>
+
+    <section class="karte abstand" aria-labelledby="dazu-titel">
+      <div class="abschnitt-kopf">
+        <div>
+          <h2 id="dazu-titel">Weiterem Kurs beitreten</h2>
+          <p class="leise klein">Mit Name und Code meldest du dich auf jedem Gerät an. Gib deinen Code nicht weiter.</p>
         </div>
+      </div>
+      <form id="form-dazu" class="zeile" autocomplete="off">
+        <label class="sr" for="d-kurscode">Kurscode</label>
+        <input id="d-kurscode" name="kurscode" class="code-eingabe kurzfeld" type="text" maxlength="8" required placeholder="Kurscode, z. B. K7M2QX">
         <button class="knopf" type="submit">Beitreten</button>
       </form>
     </section>
@@ -47,7 +58,7 @@
     <span><a href="/datenschutz">Datenschutz</a></span>
   </div>
 </footer>
-<script src="/static/js/common.js?v=0.3.0"></script>
-<script src="/static/js/schueler.js?v=0.3.0"></script>
+<script src="/static/js/common.js?v=0.4.0"></script>
+<script src="/static/js/schueler.js?v=0.4.0"></script>
 </body>
 </html>

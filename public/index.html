@@ -4,16 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#15385A">
+<meta name="theme-color" content="#0B1B2E">
 <title>InfoLabs – Lernplattformen für Informatik</title>
 <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/static/css/portal.css?v=0.3.0">
+<link rel="preload" href="/static/fonts/space-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/static/css/portal.css?v=0.4.0">
 </head>
-<body>
+<body class="startseite">
 <a class="skip" href="#haupt">Zum Inhalt springen</a>
 <header class="kopf">
   <div class="kopf-innen">
-    <a class="marke" href="/"><img src="/static/favicon.svg" alt=""><div><b>InfoLabs</b><span>Plattform-Verbund Informatik</span></div></a>
+    <a class="marke" href="/"><img src="/static/favicon.svg" alt=""><div><b>Info<i>Labs</i></b><span>Plattform-Verbund Informatik</span></div></a>
     <nav id="kopf-nav" aria-label="Konto"></nav>
   </div>
 </header>
@@ -22,12 +23,14 @@
   <section class="buehne">
     <div class="buehne-innen">
       <div>
-        <h1>Informatik üben – ein Login für alle Labs</h1>
-        <p class="unterzeile">InfoLabs verbindet die Lernplattformen für den Informatikunterricht der Oberstufe (Niedersachsen, Abitur ab 2027). Du meldest dich einmal an und landest direkt in den Labs deiner Kurse.</p>
+        <p class="vorzeile">Informatik · Oberstufe · Niedersachsen</p>
+        <h1>Ein Login.<br><span class="akzent">Alle Labs.</span></h1>
+        <p class="unterzeile">InfoLabs verbindet die Lernplattformen für den Informatikunterricht der Oberstufe. Du meldest dich einmal an und landest direkt in den Labs deiner Kurse – vom Algorithmen-Dungeon bis zum Automaten-Labor.</p>
+        <div class="netz" id="netz" aria-hidden="true"></div>
         <ul class="vorteile">
-          <li>Beitritt mit Kurscode und selbst gewähltem Namen – keine E-Mail, kein Passwort</li>
-          <li>Ein persönlicher Code für alle Plattformen und Geräte</li>
-          <li>Jede Plattform hat einen Gastmodus zum Ausprobieren</li>
+          <li>Kurscode + Name – ohne E-Mail</li>
+          <li>Ein Code für alle Geräte</li>
+          <li>Gastmodus zum Reinschnuppern</li>
         </ul>
       </div>
 
@@ -134,11 +137,47 @@
     </div>
   </section>
 
-  <section class="breit" aria-labelledby="plattformen-titel">
-    <h2 id="plattformen-titel">Die Plattformen</h2>
-    <p class="leise">Jede Plattform deckt ein Themenfeld ab – mit automatisch geprüften Aufgaben im Abitur-Stil. Im Gastmodus kannst du ohne Anmeldung reinschnuppern.</p>
-    <div class="raster" id="plattformen"><p class="leise">Wird geladen …</p></div>
-  </section>
+  <div class="nach-buehne">
+    <section class="breit" aria-labelledby="schritte-titel">
+      <div class="abschnitt-kopf">
+        <div>
+          <p class="vorzeile">So funktioniert’s</p>
+          <h2 id="schritte-titel">In drei Schritten in deinen Labs</h2>
+        </div>
+      </div>
+      <div class="schritte">
+        <div class="schritt"><h3>Kurscode eingeben</h3><p>Deine Lehrkraft gibt dir einen Kurscode, einen Link oder einen QR-Code.</p></div>
+        <div class="schritt"><h3>Namen wählen, Code notieren</h3><p>Vorname und Initial genügen. Deinen persönlichen Code schreibst du dir auf – er gilt überall.</p></div>
+        <div class="schritt"><h3>Weiter zu den Labs</h3><p>Ein Tipp auf „Weiter zu …“ – du bist auf jeder Plattform deiner Kurse sofort angemeldet.</p></div>
+      </div>
+    </section>
+
+    <section class="breit" aria-labelledby="plattformen-titel">
+      <div class="abschnitt-kopf">
+        <div>
+          <p class="vorzeile">Der Verbund</p>
+          <h2 id="plattformen-titel">Die Plattformen</h2>
+          <p class="leise">Jedes Lab deckt ein Themenfeld ab – mit automatisch geprüften Aufgaben im Abitur-Stil und eigenem Look. Im Gastmodus kannst du ohne Anmeldung reinschnuppern.</p>
+        </div>
+      </div>
+      <div class="raster" id="plattformen"><p class="leise">Wird geladen …</p></div>
+    </section>
+
+    <section class="breit" aria-labelledby="lk-titel">
+      <div class="lehrkraft-band">
+        <div>
+          <p class="vorzeile">Für Lehrkräfte</p>
+          <h2 id="lk-titel">Kurse anlegen, Plattformen freischalten, Lernstand sehen</h2>
+          <ul>
+            <li>Ein Kurs für alle Labs – mit Kurscode, Beitritts-Link und QR-Code</li>
+            <li>Mitlehrkräfte einladen, Codelisten drucken, Kennzahlen je Plattform</li>
+            <li>Datensparsam: keine Klarnamen, Löschung automatisch zum Schuljahresende</li>
+          </ul>
+        </div>
+        <div class="zeile"><a class="knopf" href="#anmelden" id="lk-anmelden">Anmelden</a><a class="knopf hell" href="#anmelden" id="lk-anfragen">Zugang anfragen</a></div>
+      </div>
+    </section>
+  </div>
 </main>
 
 <footer class="fuss">
@@ -147,7 +186,7 @@
     <span><a href="/datenschutz">Datenschutz</a></span>
   </div>
 </footer>
-<script src="/static/js/common.js?v=0.3.0"></script>
-<script src="/static/js/start.js?v=0.3.0"></script>
+<script src="/static/js/common.js?v=0.4.0"></script>
+<script src="/static/js/start.js?v=0.4.0"></script>
 </body>
 </html>

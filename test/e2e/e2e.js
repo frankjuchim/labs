@@ -147,9 +147,9 @@ async function main() {
     await s1.check('#code-ok');
     await s1.click('#code-weiter');
     await s1.waitForURL(/\/schueler$/);
-    await s1.waitForSelector('text=Weiter zu Testlabor');
+    await s1.waitForSelector('a.weiter:has-text("Testlabor")');
     await bild(s1, 'schueler_plattformen.png');
-    await s1.click('text=Weiter zu Testlabor');
+    await s1.click('a.weiter:has-text("Testlabor")');
     await s1.waitForURL(tpUrl + '/');
     assert.match(await s1.textContent('body'), /Angemeldet als Mika R\. \(schueler\)/);
 

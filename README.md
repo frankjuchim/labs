@@ -95,8 +95,12 @@ docs/               INTEGRATION.md, screenshots/ (vom E2E-Durchlauf erzeugt)
 VERTRAG.md          Vertrag des Plattform-Verbunds (maßgeblich)
 ```
 
-Gestaltung: Hausfarben #1F4E79 (primär), Gold #B8860B, Grün #548235, Rot #C00000, Kasten #DBE7F5; Systemschrift, keine
-externen Ressourcen; Touch-Ziele ≥ 44 px, Tastaturbedienung, Druckansicht für Codelisten.
+Gestaltung „Verbund“ (bewusst anders als die Plattformen, die jeweils ein eigenes Design haben): nachtblaue Bühne
+(#0B1B2E) mit Punktraster und einem Netz, in dem jede Plattform als farbiger Knoten am InfoLabs-Zentrum hängt;
+Überschriften in Space Grotesk (lokal in `public/static/fonts`, SIL OFL), Fließtext Systemschrift; Plattform-Kacheln
+in der jeweiligen Plattformfarbe (Schriftfarbe automatisch nach Kontrast); Hausfarben #1F4E79, Gold #B8860B/#E3B341,
+Grün #548235, Rot #C00000, Kasten #DBE7F5; Touch-Ziele ≥ 44 px, Tastaturbedienung, Bewegung nur ohne
+„reduzierte Bewegung“, Druckansicht für Codelisten.
 
 ## 4. Entwicklung und Prüfung
 

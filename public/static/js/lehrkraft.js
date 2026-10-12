@@ -68,6 +68,14 @@
     );
   }
 
+  /** Farbstreifen einer Kurskarte aus den Farben der aktiven Plattformen. */
+  function streifen(liste) {
+    const f = liste.filter((p) => p.aktiv).map((p) => p.farbe);
+    if (!f.length) return null;
+    const teil = 100 / f.length;
+    return { '--streifen': `linear-gradient(90deg, ${f.map((c, i) => `${c} ${i * teil}% ${(i + 1) * teil}%`).join(', ')})` };
+  }
+
   async function kursListe() {
     const [{ kurse, standardAblauf }, { plattformen }] = await Promise.all([api('GET', '/api/lehrkraft/kurse'), api('GET', '/api/lehrkraft/plattformen')]);
     st.wahl = plattformen;
@@ -100,7 +108,7 @@
             kurse.map((k) =>
               h(
                 'a',
-                { class: 'karte kurskarte', href: '#/kurs/' + k.id },
+                { class: 'karte kurskarte', href: '#/kurs/' + k.id, style: streifen(k.plattformen) },
                 h('div', { class: 'zeile' }, h('h3', { style: { margin: 0 } }, k.name), rollenChip(k.rolle)),
                 h('p', { class: 'leise klein' }, 'Kurscode ', h('span', { class: 'code' }, k.code), k.inhaber && k.rolle !== 'inhaber' ? ` · ${k.inhaber.name}` : ''),
                 h('div', { class: 'zahlen' }, h('div', { class: 'zahl' }, h('b', null, k.kennzahlen.schueler), h('span', null, 'Schüler')), h('div', { class: 'zahl' }, h('b', null, k.kennzahlen.aktiv7), h('span', null, 'aktiv (7 Tage)'))),
