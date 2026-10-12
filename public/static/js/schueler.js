@@ -41,8 +41,10 @@
             : h('p', { class: 'hinweis' }, 'Für diesen Kurs ist noch keine Plattform freigeschaltet. Deine Lehrkraft richtet das ein.')
         )
       )
-    );
+    );    if (window.IL_EFFEKTE) for (const k of document.querySelectorAll('.weiter')) IL_EFFEKTE.neigen(k, 5);
   }
+
+  if (window.IL_EFFEKTE) IL_EFFEKTE.lichtkegel(document.querySelector('.buehne'));
 
   $('code-zeigen').addEventListener('click', () => {
     const c = $('code');

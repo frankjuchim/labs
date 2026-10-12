@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#0B1B2E">
+<meta name="theme-color" content="#F7F9FD">
 <title>InfoLabs – Lernplattformen für Informatik</title>
 <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/static/fonts/space-grotesk.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/css/portal.css?v=0.4.0">
+<link rel="stylesheet" href="/static/css/portal.css?v=0.5.0">
 </head>
 <body class="startseite">
 <a class="skip" href="#haupt">Zum Inhalt springen</a>
@@ -26,6 +26,7 @@
         <p class="vorzeile">Informatik · Oberstufe · Niedersachsen</p>
         <h1>Ein Login.<br><span class="akzent">Alle Labs.</span></h1>
         <p class="unterzeile">InfoLabs verbindet die Lernplattformen für den Informatikunterricht der Oberstufe. Du meldest dich einmal an und landest direkt in den Labs deiner Kurse – vom Algorithmen-Dungeon bis zum Automaten-Labor.</p>
+        <p class="wechsel-zeile" id="wechsel-zeile" hidden>Gerade im Verbund: <b id="wechsel"></b></p>
         <div class="netz" id="netz" aria-hidden="true"></div>
         <ul class="vorteile">
           <li>Kurscode + Name – ohne E-Mail</li>
@@ -138,6 +139,10 @@
   </section>
 
   <div class="nach-buehne">
+    <div class="kennband erscheinen" id="kennband" hidden>
+      <div class="kennband-innen" id="kennzahlen"></div>
+    </div>
+
     <section class="breit" aria-labelledby="schritte-titel">
       <div class="abschnitt-kopf">
         <div>
@@ -146,9 +151,9 @@
         </div>
       </div>
       <div class="schritte">
-        <div class="schritt"><h3>Kurscode eingeben</h3><p>Deine Lehrkraft gibt dir einen Kurscode, einen Link oder einen QR-Code.</p></div>
-        <div class="schritt"><h3>Namen wählen, Code notieren</h3><p>Vorname und Initial genügen. Deinen persönlichen Code schreibst du dir auf – er gilt überall.</p></div>
-        <div class="schritt"><h3>Weiter zu den Labs</h3><p>Ein Tipp auf „Weiter zu …“ – du bist auf jeder Plattform deiner Kurse sofort angemeldet.</p></div>
+        <div class="schritt erscheinen"><h3>Kurscode eingeben</h3><p>Deine Lehrkraft gibt dir einen Kurscode, einen Link oder einen QR-Code.</p></div>
+        <div class="schritt erscheinen"><h3>Namen wählen, Code notieren</h3><p>Vorname und Initial genügen. Deinen persönlichen Code schreibst du dir auf – er gilt überall.</p></div>
+        <div class="schritt erscheinen"><h3>Weiter zu den Labs</h3><p>Ein Tipp auf „Weiter zu …“ – du bist auf jeder Plattform deiner Kurse sofort angemeldet.</p></div>
       </div>
     </section>
 
@@ -164,7 +169,7 @@
     </section>
 
     <section class="breit" aria-labelledby="lk-titel">
-      <div class="lehrkraft-band">
+      <div class="lehrkraft-band erscheinen">
         <div>
           <p class="vorzeile">Für Lehrkräfte</p>
           <h2 id="lk-titel">Kurse anlegen, Plattformen freischalten, Lernstand sehen</h2>
@@ -186,7 +191,8 @@
     <span><a href="/datenschutz">Datenschutz</a></span>
   </div>
 </footer>
-<script src="/static/js/common.js?v=0.4.0"></script>
-<script src="/static/js/start.js?v=0.4.0"></script>
+<script src="/static/js/common.js?v=0.5.0"></script>
+<script src="/static/js/effekte.js?v=0.5.0"></script>
+<script src="/static/js/start.js?v=0.5.0"></script>
 </body>
 </html>

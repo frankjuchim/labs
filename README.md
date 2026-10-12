@@ -95,12 +95,15 @@ docs/               INTEGRATION.md, screenshots/ (vom E2E-Durchlauf erzeugt)
 VERTRAG.md          Vertrag des Plattform-Verbunds (maßgeblich)
 ```
 
-Gestaltung „Verbund“ (bewusst anders als die Plattformen, die jeweils ein eigenes Design haben): nachtblaue Bühne
-(#0B1B2E) mit Punktraster und einem Netz, in dem jede Plattform als farbiger Knoten am InfoLabs-Zentrum hängt;
-Überschriften in Space Grotesk (lokal in `public/static/fonts`, SIL OFL), Fließtext Systemschrift; Plattform-Kacheln
-in der jeweiligen Plattformfarbe (Schriftfarbe automatisch nach Kontrast); Hausfarben #1F4E79, Gold #B8860B/#E3B341,
-Grün #548235, Rot #C00000, Kasten #DBE7F5; Touch-Ziele ≥ 44 px, Tastaturbedienung, Bewegung nur ohne
-„reduzierte Bewegung“, Druckansicht für Codelisten.
+Gestaltung „Verbund · Aurora“ (bewusst anders als die Plattformen: Algo Quest ist dunkel mit Dungeon-Mauer, AutomatenLab
+grün auf Kästchenpapier): helle Bühne mit langsam fließender Aurora aus den Hausfarben, gläserne Kopfzeile und
+Anmeldekarte, Verlaufs-Schriftzug, Regenbogenkante; ein Netz, in dem jede Plattform als farbiger Knoten am
+InfoLabs-Zentrum hängt (aus den Manifesten); Überschriften in Space Grotesk (lokal in `public/static/fonts`, SIL OFL),
+Fließtext Systemschrift; Plattform-Kacheln in der jeweiligen Plattformfarbe (Schriftfarbe automatisch nach Kontrast).
+Spezialeffekte (`public/static/js/effekte.js`): schwebende Knoten mit Datenpaketen, wechselndes Themenfeld,
+hochzählende Kennzahlen, 3D-Neigung mit Lichtreflex, Einblenden beim Scrollen, Lichtkegel am Mauszeiger, Konfetti beim
+Beitritt – alle aus bei „reduzierter Bewegung“, ohne JavaScript bleibt die Seite vollständig nutzbar (E2E prüft beides).
+Touch-Ziele ≥ 44 px, Tastaturbedienung, Druckansicht für Codelisten.
 
 ## 4. Entwicklung und Prüfung
 

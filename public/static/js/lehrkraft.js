@@ -120,6 +120,7 @@
         : h('p', { class: 'leer karte' }, 'Noch keine Kurse. Legen Sie unten Ihren ersten Kurs an.'),
       h('div', { class: 'abstand' }, formular)
     );
+    if (window.IL_EFFEKTE) for (const k of ansicht.querySelectorAll('.kurskarte')) IL_EFFEKTE.neigen(k, 4);
   }
 
   /* ---------- Kursdetail ---------- */

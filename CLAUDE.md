@@ -83,9 +83,12 @@ docs/            INTEGRATION.md, screenshots/
 - Neue Endpunkte: Rechte für jede Rolle testen (`rechte.test.js`), Fehlertexte auf Deutsch, ohne Details.
 
 ### Oberfläche
-- Design „Verbund“: Nachtblau #0B1B2E, Hausfarben #1F4E79 / Gold #B8860B (#E3B341 auf dunkel) / Grün #548235 /
-  Rot #C00000 / Kasten #DBE7F5; Überschriften Space Grotesk (lokal, `public/static/fonts`); Plattformen in ihrer
-  Manifest-Farbe (`IL.textFarbe` für lesbaren Text). Das Portal sieht bewusst anders aus als die Plattformen.
+- Design „Verbund · Aurora“: hell, Aurora aus den Hausfarben #1F4E79 / Gold #B8860B (#E3B341) / Grün #548235 /
+  Rot #C00000, Nachtblau #0B1B2E für Text und Fußzeile; Überschriften Space Grotesk (lokal, `public/static/fonts`);
+  Plattformen in ihrer Manifest-Farbe (`IL.textFarbe` für lesbaren Text). Das Portal sieht bewusst anders aus als die
+  Plattformen (Algo Quest dunkel/Dungeon, AutomatenLab grün/Kästchenpapier).
+- Spezialeffekte nur in `effekte.js` (global `window.IL_EFFEKTE`), immer mit `prefers-reduced-motion`-Ausstieg; Inhalte
+  dürfen ohne Effekte nie versteckt bleiben (E2E prüft „nach dem Scrollen alles sichtbar“ und reduzierte Bewegung).
 - Touch-Ziele ≥ 44 px; Tablet und Smartphone ohne horizontales Scrollen (E2E prüft das); Animationen nur ohne
   `prefers-reduced-motion`.
 - Nach Änderungen an `public/static/**` die `?v=`-Version in `public/*.html` **und** `package.json` erhöhen

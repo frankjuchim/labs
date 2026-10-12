@@ -57,14 +57,27 @@ async function main() {
   const browser = await chromium.launch({ executablePath: chromiumPfad(), headless: true });
   const fehler = [];
   async function neueSeite(groesse) {
-    const ctx = await browser.newContext({ viewport: groesse, locale: 'de-DE' });
+    const ctx = await browser.newContext({ viewport: groesse, locale: 'de-DE', reducedMotion: 'no-preference' });
     const page = await ctx.newPage();
     // Meldungen der Test-Plattform (z. B. fehlendes favicon.ico) zählen nicht
     page.on('console', (m) => m.type() === 'error' && !page.url().startsWith(tpUrl) && fehler.push(`${page.url()}: ${m.text()}`));
     page.on('pageerror', (e) => fehler.push(`${page.url()}: ${e.message}`));
     return page;
   }
-  const bild = (page, name, voll = true) => page.screenshot({ path: path.join(BILDER, name), fullPage: voll });
+  // vor dem Screenshot einmal durch die Seite scrollen, damit eingeblendete Abschnitte sichtbar sind
+  const bild = async (page, name, voll = true) => {
+    if (voll) {
+      await page.evaluate(async () => {
+        for (let y = 0; y < document.body.scrollHeight; y += 400) {
+          window.scrollTo(0, y);
+          await new Promise((r) => setTimeout(r, 60));
+        }
+        window.scrollTo(0, 0);
+      });
+      await page.waitForTimeout(800);
+    }
+    return page.screenshot({ path: path.join(BILDER, name), fullPage: voll });
+  };
 
   try {
     /* 1. Superadmin: Testlabor eintragen, Rücksprung bestätigen, AutomatenLab vorläufig */
@@ -189,6 +202,24 @@ async function main() {
     await gastHandy.goto(portalUrl + '/');
     await gastHandy.waitForSelector('.plattform >> text=Testlabor');
     await bild(gastHandy, 'startseite_handy.png');
+
+    /* 8b. Spezialeffekte: nach dem Scrollen ist alles eingeblendet; mit „reduzierter Bewegung“ sofort alles sichtbar */
+    const unsichtbar = (p) => p.evaluate(() => [...document.querySelectorAll('.erscheinen:not([hidden])')].filter((e) => getComputedStyle(e).opacity !== '1').length);
+    await gast.evaluate(async () => {
+      for (let y = 0; y < document.body.scrollHeight; y += 300) {
+        window.scrollTo(0, y);
+        await new Promise((r) => setTimeout(r, 80));
+      }
+    });
+    await gast.waitForTimeout(900);
+    assert.equal(await unsichtbar(gast), 0, 'Abschnitte bleiben nach dem Scrollen unsichtbar');
+    assert.ok(await gast.evaluate(() => document.querySelectorAll('#netz .paket').length > 0), 'Netz ohne Datenpakete');
+    const ruhigCtx = await browser.newContext({ viewport: TABLET, locale: 'de-DE', reducedMotion: 'reduce' });
+    const ruhigSeite = await ruhigCtx.newPage();
+    await ruhigSeite.goto(portalUrl + '/');
+    await ruhigSeite.waitForSelector('.plattform >> text=Testlabor');
+    assert.equal(await unsichtbar(ruhigSeite), 0, 'reduzierte Bewegung: Inhalte versteckt');
+    assert.equal(await ruhigSeite.evaluate(() => document.querySelectorAll('#netz .paket').length), 0, 'reduzierte Bewegung: Animation läuft');
 
     /* 9. keine horizontale Scrollleiste auf dem Smartphone */
     for (const [p, url] of [[gastHandy, '/'], [gastHandy, '/datenschutz'], [gastHandy, '/anmelden?weiter=%2Fsso%2Fautorisieren%3Fplattform%3Dtestlabor'], [gastHandy, '/gibt-es-nicht']]) {

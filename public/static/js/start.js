@@ -81,43 +81,94 @@
     const ziel = $('netz');
     if (!ziel) return;
     const B = 560;
-    const H = 220;
-    const mx = B / 2;
-    const my = 128;
+    const H = 230;
+    const zentrum = { x: B / 2, y: 132 };
     const plaetze = Math.max(5, liste.length + 2);
     const knoten = [];
     for (let i = 0; i < plaetze; i++) {
       const w = Math.PI * (1.08 + (0.84 * i) / (plaetze - 1)); // Bogen über der Mitte
-      knoten.push({ x: mx + Math.cos(w) * 220, y: my + Math.sin(w) * 92 + 6, p: null });
+      knoten.push({ x: zentrum.x + Math.cos(w) * 220, y: zentrum.y + Math.sin(w) * 92 + 6, p: null });
     }
-    // Plattformen mittig im Bogen verteilen
     const start = Math.floor((plaetze - liste.length) / 2);
     liste.forEach((p, i) => (knoten[start + i].p = p));
-    const kanten = knoten.map((k) => svg('line', { class: 'kante' + (k.p ? '' : ' leer'), x1: mx, y1: my, x2: k.x, y2: k.y }));
-    const ringe = [svg('ellipse', { class: 'ring', cx: mx, cy: my + 6, rx: 220, ry: 92 })];
-    const punkte = knoten.map((k) => {
-      if (!k.p) return svg('circle', { class: 'knoten-leer', cx: k.x, cy: k.y, r: 13 });
-      const a = svg('g', null); // nur Bild (aria-hidden) – die Links stehen in den Kacheln darunter
-      a.appendChild(svg('circle', { class: 'knoten-kreis', cx: k.x, cy: k.y, r: 23, fill: k.p.farbe }));
-      a.appendChild(svg('text', { class: 'knoten-text', x: k.x, y: k.y + 1, fill: textFarbe(k.p.farbe) }, kuerzel(k.p.name)));
-      a.appendChild(svg('text', { class: 'knoten-name' + (k.p.vorlaeufig ? ' leise' : ''), x: k.x, y: k.y + 42 }, k.p.name));
-      return a;
-    });
-    const zentrum = [
-      svg('circle', { class: 'puls', cx: mx, cy: my, r: 30 }),
-      svg('circle', { class: 'zentrum', cx: mx, cy: my, r: 30 }),
-      svg('text', { class: 'zentrum-text', x: mx, y: my + 1 }, 'InfoLabs')
-    ];
-    zeige(ziel, svg('svg', { viewBox: `0 0 ${B} ${H}`, focusable: 'false' }, ringe, kanten, punkte, zentrum));
+    const ring = svg('ellipse', { class: 'ring', cx: zentrum.x, cy: zentrum.y + 6, rx: 220, ry: 92 });
+    for (const k of knoten) k.linie = svg('line', { class: 'kante' + (k.p ? '' : ' leer'), x1: zentrum.x, y1: zentrum.y, x2: k.x, y2: k.y });
+    for (const k of knoten) {
+      k.gruppe = svg('g', null);
+      if (!k.p) k.gruppe.appendChild(svg('circle', { class: 'knoten-leer', cx: k.x, cy: k.y, r: 13 }));
+      else {
+        k.gruppe.appendChild(svg('circle', { class: 'knoten-kreis', cx: k.x, cy: k.y, r: 24, fill: k.p.farbe }));
+        k.gruppe.appendChild(svg('text', { class: 'knoten-text', x: k.x, y: k.y + 1, fill: textFarbe(k.p.farbe) }, kuerzel(k.p.name)));
+        k.gruppe.appendChild(svg('text', { class: 'knoten-name' + (k.p.vorlaeufig ? ' leise' : ''), x: k.x, y: k.y + 43 }, k.p.name));
+      }
+    }
+    const mitte = svg(
+      'g',
+      { class: 'zentrum-gruppe' },
+      svg('circle', { class: 'puls', cx: zentrum.x, cy: zentrum.y, r: 31 }),
+      svg('circle', { class: 'zentrum', cx: zentrum.x, cy: zentrum.y, r: 31 }),
+      svg('text', { class: 'zentrum-text', x: zentrum.x, y: zentrum.y + 1 }, 'InfoLabs')
+    );
+    const bild = svg('svg', { viewBox: `0 0 ${B} ${H}`, focusable: 'false' }, ring, knoten.map((k) => k.linie), knoten.map((k) => k.gruppe), mitte);
+    zeige(ziel, bild);
+    if (window.IL_EFFEKTE) IL_EFFEKTE.belebeNetz(bild, knoten, zentrum);
+  }
+
+  /** Wechselndes Themenfeld im Kopf („Gerade im Verbund: …“). */
+  function wechselZeile(liste) {
+    const felder = liste.map((p) => p.themenfeld).filter(Boolean);
+    if (!felder.length) return;
+    const el = $('wechsel');
+    let i = 0;
+    el.textContent = felder[0];
+    $('wechsel-zeile').hidden = false;
+    if (felder.length < 2 || !window.IL_EFFEKTE || IL_EFFEKTE.ruhig) return;
+    setInterval(() => {
+      el.classList.add('weg');
+      setTimeout(() => {
+        i = (i + 1) % felder.length;
+        el.textContent = felder[i];
+        el.classList.remove('weg');
+      }, 350);
+    }, 3200);
+  }
+
+  /** Kennzahlen des Verbunds (aus den Manifesten), hochzählend. */
+  function kennzahlen(liste) {
+    const summe = (k) => liste.reduce((s, p) => s + (p.umfang && Number.isInteger(p.umfang[k]) ? p.umfang[k] : 0), 0);
+    const werte = [
+      [liste.length, liste.length === 1 ? 'Lab im Verbund' : 'Labs im Verbund'],
+      [summe('aufgaben'), 'geprüfte Aufgaben'],
+      [summe('welten'), 'Welten'],
+      [1, 'Login für alles']
+    ].filter(([n]) => n > 0);
+    if (werte.length < 3) return;
+    const ziel = $('kennzahlen');
+    zeige(ziel, werte.map(([n, t]) => h('div', { class: 'kennzahl' }, h('b', { dataset: { ziel: n } }, '0'), h('span', null, t))));
+    $('kennband').hidden = false;
+    for (const b of ziel.querySelectorAll('b')) {
+      const n = Number(b.dataset.ziel);
+      if (window.IL_EFFEKTE) IL_EFFEKTE.zaehlen(b, n);
+      else b.textContent = n.toLocaleString('de-DE');
+    }
   }
 
   async function ladePlattformen() {
     try {
       plattformen = (await api('GET', '/api/plattformen')).plattformen;
       zeichneNetz(plattformen);
+      wechselZeile(plattformen);
+      kennzahlen(plattformen);
       const ziel = $('plattformen');
       if (!plattformen.length) zeige(ziel, h('p', { class: 'leise' }, 'Noch keine Plattformen eingetragen.'), baldKarte());
       else zeige(ziel, plattformen.map(karte), baldKarte());
+      if (window.IL_EFFEKTE) {
+        for (const k of ziel.querySelectorAll('.plattform')) {
+          k.classList.add('erscheinen');
+          if (!k.classList.contains('bald')) IL_EFFEKTE.neigen(k);
+        }
+        IL_EFFEKTE.erscheinen();
+      }
     } catch (e) {
       zeichneNetz([]);
       zeige($('plattformen'), h('p', { class: 'leise' }, 'Die Übersicht konnte nicht geladen werden.'));
@@ -160,6 +211,7 @@
     $('code-wert').textContent = r.code;
     $('code-box').hidden = false;
     $('code-ok').focus();
+    if (window.IL_EFFEKTE) IL_EFFEKTE.konfetti();
   });
   $('code-ok').addEventListener('change', (e) => ($('code-weiter').disabled = !e.target.checked));
   $('code-weiter').addEventListener('click', () => location.assign(ziel('schueler')));
@@ -233,6 +285,10 @@
   });
 
   /* ---------- Start ---------- */
+  if (window.IL_EFFEKTE) {
+    IL_EFFEKTE.lichtkegel(document.querySelector('.buehne'));
+    IL_EFFEKTE.erscheinen();
+  }
   (async () => {
     await ladePlattformen();
     ssoHinweis();
