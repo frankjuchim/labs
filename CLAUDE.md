@@ -61,6 +61,8 @@ docs/            INTEGRATION.md, screenshots/
 - `sub`: `a:<id>` Superadmin, `l:<id>` Lehrkraft, `s:<id>` Schüler; Kurs-ID `k:<id>`; IDs mit `AUTOINCREMENT` (nie neu vergeben).
 - Kurscode 6 Zeichen aus `ABCDEFGHJKLMNPQRSTUVWXYZ23456789`; persönlicher Code `ABC-234` (Buchstaben ohne I/O,
   Ziffern 2–9), kursübergreifend eindeutig (UNIQUE). Schülername 2–30 Zeichen, je Kurs eindeutig (ohne Groß/Klein).
+- Sichtbar heißt die oberste Rolle **„Admin“** (Kontoname „Admin“, geht per SSO als `name` an die Plattformen);
+  technisch bleibt sie `superadmin` (`sub a:<id>`, Token-`rolle`, Vertrag §5) – nicht umbenennen.
 - Passwörter: `crypto.scrypt`, Format `scrypt$N$r$p$salt$hash` wie Algo Quest (importierte Hashes bleiben gültig).
 - Ein Schüler = ein Konto für mehrere Kurse. Schüler ohne Kurs werden gelöscht (Kurs löschen, aus Kurs entfernen, Ablauf).
 

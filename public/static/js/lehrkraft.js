@@ -56,7 +56,7 @@
   /* ---------- Kursliste ---------- */
 
   const rollenChip = (rolle) =>
-    rolle === 'inhaber' ? null : h('span', { class: 'chip gold' }, rolle === 'mitlehrkraft' ? 'Mitlehrkraft' : 'als Superadmin');
+    rolle === 'inhaber' ? null : h('span', { class: 'chip gold' }, rolle === 'mitlehrkraft' ? 'Mitlehrkraft' : 'als Admin');
 
   function plattformChips(liste) {
     return h(
@@ -475,7 +475,7 @@
         ich.plattformen.length ? h('div', { class: 'marken' }, ich.plattformen.map((p) => h('span', { class: 'chip' }, p))) : h('p', { class: 'leise' }, 'Noch keine – der Administrator schaltet Plattformen frei.')
       ),
       einladungen,
-      ich.rolle === 'superadmin' ? h('p', { class: 'hinweis klein' }, 'Das Superadmin-Passwort wird über die Umgebungsvariable ADMIN_PASSWORD festgelegt.') : pw
+      ich.rolle === 'superadmin' ? h('p', { class: 'hinweis klein' }, 'Das Admin-Passwort wird über die Umgebungsvariable ADMIN_PASSWORD festgelegt.') : pw
     );
   }
 

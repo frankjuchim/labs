@@ -11,7 +11,7 @@ function adminRoutes({ svc, ctx, nachWiederherstellung = () => {} }) {
   r.use((req, res, next) => {
     const s = req.sitzung();
     if (!s || s.typ !== 'lehrkraft') return res.status(401).json({ error: 'Bitte melden Sie sich an.' });
-    if (s.r.rolle !== 'superadmin') return res.status(403).json({ error: 'Nur für den Superadmin.' });
+    if (s.r.rolle !== 'superadmin') return res.status(403).json({ error: 'Nur für den Admin.' });
     req.lk = s.r;
     next();
   });

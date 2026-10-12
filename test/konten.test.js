@@ -146,3 +146,19 @@ test('Freischaltung je Plattform: nur eingetragene, nicht vorläufige Plattforme
   const wahl = await H.erwarte(await lk.get('/api/lehrkraft/plattformen'), 200);
   assert.deepEqual(wahl.plattformen.map((p) => p.id), ['algoquest']);
 });
+
+test('Admin-Konto heißt „Admin“ (Rolle bleibt superadmin); früherer Name „Superadmin“ wird beim Start umbenannt', async () => {
+  const app = H.makeApp();
+  const admin = await H.adminClient(app);
+  const ich = await H.erwarte(await admin.get('/api/lehrkraft/ich'), 200);
+  assert.equal(ich.name, 'Admin');
+  assert.equal(ich.rolle, 'superadmin');
+  const db = app.locals.ctx.db;
+  db.prepare("UPDATE lehrkraefte SET name = 'Superadmin' WHERE rolle = 'superadmin'").run();
+  app.locals.dienste.konten.sichereSuperadmin(H.ADMIN_EMAIL, H.ADMIN_PW);
+  assert.equal(db.prepare("SELECT name FROM lehrkraefte WHERE rolle = 'superadmin'").get().name, 'Admin');
+  // ein selbst gewählter Name bleibt
+  db.prepare("UPDATE lehrkraefte SET name = 'Schuladmin' WHERE rolle = 'superadmin'").run();
+  app.locals.dienste.konten.sichereSuperadmin(H.ADMIN_EMAIL, H.ADMIN_PW);
+  assert.equal(db.prepare("SELECT name FROM lehrkraefte WHERE rolle = 'superadmin'").get().name, 'Schuladmin');
+});

@@ -55,11 +55,14 @@ function createKonten(ctx, { loeschung }) {
     if (konflikt) throw new Error(`ADMIN_EMAIL „${mail}“ gehört bereits einer Lehrkraft – bitte eine andere Adresse wählen.`);
     if (!vorhanden) {
       const info = db
-        .prepare("INSERT INTO lehrkraefte (email, name, pw_hash, rolle, status, created_at, entschieden_at) VALUES (?, 'Superadmin', ?, 'superadmin', 'aktiv', ?, ?)")
+        .prepare("INSERT INTO lehrkraefte (email, name, pw_hash, rolle, status, created_at, entschieden_at) VALUES (?, 'Admin', ?, 'superadmin', 'aktiv', ?, ?)")
         .run(mail, S.hashPasswortSync(passwort), iso(), iso());
       return Number(info.lastInsertRowid);
     }
     if (vorhanden.email !== mail) db.prepare('UPDATE lehrkraefte SET email = ? WHERE id = ?').run(mail, vorhanden.id);
+    // Anzeigename (geht per SSO als „name“ an die Plattformen): früherer Standard „Superadmin“ → „Admin“.
+    // Die Rolle bleibt „superadmin“ (Vertrag §5), nur der sichtbare Name ändert sich.
+    if (vorhanden.name === 'Superadmin') db.prepare("UPDATE lehrkraefte SET name = 'Admin' WHERE id = ?").run(vorhanden.id);
     if (!S.pruefePasswortSync(passwort, vorhanden.pw_hash)) {
       db.prepare('UPDATE lehrkraefte SET pw_hash = ?, session_gen = session_gen + 1 WHERE id = ?').run(S.hashPasswortSync(passwort), vorhanden.id);
     }
@@ -91,7 +94,7 @@ function createKonten(ctx, { loeschung }) {
     const r = mail ? db.prepare('SELECT * FROM lehrkraefte WHERE email = ?').get(mail) : null;
     const ok = await S.pruefePasswort(pw, r ? r.pw_hash : null);
     if (!r || !ok) throw Object.assign(new Error('E-Mail oder Passwort falsch.'), { status: 401 });
-    if (r.rolle === 'superadmin' && !superadminAktiv) throw new ForbiddenError('Der Superadmin-Login ist deaktiviert (ADMIN_PASSWORD nicht gesetzt).');
+    if (r.rolle === 'superadmin' && !superadminAktiv) throw new ForbiddenError('Der Admin-Login ist deaktiviert (ADMIN_PASSWORD nicht gesetzt).');
     if (r.status === 'wartet') throw new ForbiddenError('Ihre Registrierung wartet noch auf die Freigabe durch den Administrator.');
     if (r.status === 'abgelehnt') throw new ForbiddenError('Ihre Registrierung wurde abgelehnt.');
     if (r.status === 'deaktiviert') throw new ForbiddenError('Ihr Konto ist deaktiviert. Bitte wenden Sie sich an den Administrator.');
@@ -109,7 +112,7 @@ function createKonten(ctx, { loeschung }) {
   async function passwortAendern(id, alt, neu) {
     const r = lkZeile(id);
     if (!r) throw new NotFoundError('Konto nicht gefunden.');
-    if (r.rolle === 'superadmin') throw new ForbiddenError('Das Superadmin-Passwort wird über die Umgebungsvariable ADMIN_PASSWORD festgelegt.');
+    if (r.rolle === 'superadmin') throw new ForbiddenError('Das Admin-Passwort wird über die Umgebungsvariable ADMIN_PASSWORD festgelegt.');
     if (!(await S.pruefePasswort(typeof alt === 'string' ? alt : '', r.pw_hash))) throw new ValidationError('Das bisherige Passwort ist falsch.');
     const pw = V.passwort(neu, 'Neues Passwort');
     if (pw === alt) throw new ValidationError('Das neue Passwort muss sich vom bisherigen unterscheiden.');
@@ -143,7 +146,7 @@ function createKonten(ctx, { loeschung }) {
   function normalesKonto(id) {
     const r = lkZeile(id);
     if (!r) throw new NotFoundError('Lehrkraft nicht gefunden.');
-    if (r.rolle === 'superadmin') throw new ForbiddenError('Der Superadmin kann hier nicht geändert werden.');
+    if (r.rolle === 'superadmin') throw new ForbiddenError('Das Admin-Konto kann hier nicht geändert werden.');
     return r;
   }
 

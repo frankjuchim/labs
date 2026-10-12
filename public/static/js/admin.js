@@ -14,7 +14,7 @@ IL.admin = (() => {
     const neu = () => neuLaden();
 
     function aktionen(l) {
-      if (l.rolle === 'superadmin') return h('span', { class: 'leise klein' }, 'Superadmin');
+      if (l.rolle === 'superadmin') return h('span', { class: 'leise klein' }, 'Admin');
       const k = [];
       const status = (s, text, art = '') => k.push(h('button', { type: 'button', class: 'knopf klein ' + art, onclick: () => api('POST', `/api/admin/lehrkraefte/${l.id}/status`, { status: s }).then(neu, fehler) }, text));
       if (l.status === 'wartet') {
@@ -354,7 +354,7 @@ IL.admin = (() => {
         'ol',
         { class: 'klein' },
         h('li', null, 'Plattform „algoquest“ hier eintragen (Plattformen), damit Lehrkräfte und Kurse automatisch freigeschaltet werden.'),
-        h('li', null, 'In Algo Quest als Superadmin die Sicherung (Backup, JSON) herunterladen.'),
+        h('li', null, 'In Algo Quest als Admin die Sicherung (Backup, JSON) herunterladen.'),
         h('li', null, 'Datei hier wählen, zuerst als Probelauf, dann richtig übernehmen. Genutzt werden nur Lehrkräfte (mit Passwort-Hash), Kurse (mit Kurscode) und Schüler (Name + Code) – Lernstände werden nicht gelesen oder gespeichert.'),
         h('li', null, 'Die Zuordnung alt → neu (sub, Kurs-ID) herunterladen und an Algo Quest übergeben (Vertrag §11, Phase 2).')
       ),

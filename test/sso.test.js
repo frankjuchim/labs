@@ -193,6 +193,7 @@ test('Lehrkraft: nur mit Freischaltung; Token enthält eigene Kurse als lehrkraf
   const ra = await holeRuecksprung(admin);
   const ta = decode(ra.searchParams.get('token'));
   assert.equal(ta.rolle, 'superadmin');
+  assert.equal(ta.name, 'Admin', 'Plattformen zeigen den Namen „Admin“');
   assert.match(ta.sub, /^a:\d+$/);
   assert.ok(ta.kurse.some((x) => x.id === k.kursId) && ta.kurse.some((x) => x.id === kurs.kursId));
 });
