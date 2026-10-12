@@ -43,7 +43,7 @@ Weitere Regeln:
 
 ## 2. Verbund
 
-**Verbindlich für Portal und Plattformen ist der Vertrag [`VERTRAG.md`](VERTRAG.md) (Version 1.1)** in diesem
+**Verbindlich für Portal und Plattformen ist der Vertrag [`VERTRAG.md`](VERTRAG.md) (Version 1.2)** in diesem
 Repository. Er löst README Teil H im Repo `frankjuchim/AlgoQuest` ab (Abschnittsnummern gleich: §n = H.n) und regelt
 Rollen (§4), Single Sign-on mit Ed25519-JWT (§5), Verbund-API (§6), Plattform-Manifest (§7), Konfiguration (§8),
 gemeinsame Regeln (§9), Datenschutz (§10) und den Übergang bestehender Plattformen (§11). Änderungen nur dort, mit neuer
@@ -51,7 +51,7 @@ Version und Eintrag in §14.
 
 **Verweis aus einer neuen Plattform** (README und CLAUDE.md):
 „Verbindlich ist der Vertrag des Plattform-Verbunds: https://github.com/frankjuchim/labs/blob/main/VERTRAG.md
-(Version 1.1); Anschluss nach https://github.com/frankjuchim/labs/blob/main/docs/INTEGRATION.md.“
+(Version 1.2); Anschluss nach https://github.com/frankjuchim/labs/blob/main/docs/INTEGRATION.md.“
 
 | Thema | Umsetzung im Portal |
 |---|---|

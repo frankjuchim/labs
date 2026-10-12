@@ -197,6 +197,12 @@ async function main() {
     await gast.goto(portalUrl + '/');
     await gast.waitForSelector('.plattform >> text=Testlabor');
     await gast.waitForSelector('.plattform >> text=AutomatenLab');
+    // Niveau-Leiste unten auf jeder Plattform-Karte (eA und gA)
+    for (const t of await gast.$$eval('.plattform:not(.bald) .niveau-leiste', (els) => els.map((e) => e.textContent))) {
+      assert.match(t, /eA/);
+      assert.match(t, /gA/);
+    }
+    assert.ok(await gast.$('.plattform:has-text("Testlabor") .niveau-link'), 'Link zur Niveau-Übersicht fehlt');
     await bild(gast, 'startseite.png');
     const gastHandy = await neueSeite(HANDY);
     await gastHandy.goto(portalUrl + '/');

@@ -28,6 +28,10 @@ function pruefeManifest(m) {
     if (m.auth.sso && !(m.urls && text(m.urls.ssoStart))) f.push('urls.ssoStart: Pflicht, wenn auth.sso = true.');
   }
   if (!m.umfang || typeof m.umfang !== 'object' || !Number.isInteger(m.umfang.aufgaben)) f.push('umfang: { welten, level, aufgaben, bosse } (Ganzzahlen) fehlt.');
+  if (m.niveaus !== undefined && (!Array.isArray(m.niveaus) || !m.niveaus.length || m.niveaus.some((n) => !['eA', 'gA'].includes(n)))) {
+    f.push('niveaus: Liste aus "eA" und/oder "gA" (ab v1.2; ohne Angabe gilt: eA und gA).');
+  }
+  if (m.urls && m.urls.niveaus !== undefined && (typeof m.urls.niveaus !== 'string' || !m.urls.niveaus.startsWith('/'))) f.push('urls.niveaus: Pfad (beginnend mit „/“).');
   if (!Array.isArray(m.faehigkeiten)) f.push('faehigkeiten: Liste fehlt (z. B. "gast", "themen", "lehrkraft-materialien").');
   else if (!m.faehigkeiten.includes('gast')) f.push('faehigkeiten: "gast" ist Pflicht (Gastmodus /gast).');
   return f;

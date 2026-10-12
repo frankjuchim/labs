@@ -132,6 +132,11 @@ test('Plattform-Verwaltung: ungültige Basis, kein Manifest → vorläufig, Rüc
   assert.equal(al.sso, false);
   assert.equal(al.links.start, 'https://automatenlab.example/');
   assert.equal(oeff.find((p) => p.id === 'testlabor').sso, true);
+  // Niveaus (Vertrag §7/§9): aus dem Manifest bzw. Standard eA und gA, Link zur Niveau-Übersicht
+  assert.deepEqual(oeff.find((p) => p.id === 'testlabor').niveaus, ['eA', 'gA']);
+  assert.equal(oeff.find((p) => p.id === 'testlabor').links.niveaus, v.tpUrl + '/niveaus');
+  assert.deepEqual(al.niveaus, ['eA', 'gA'], 'ohne Angabe: eA und gA');
+  assert.equal(al.links.niveaus, null);
   // vorläufige Plattform nicht für Kurse wählbar und kein SSO
   assert.equal((await api(admin, 'POST', '/api/lehrkraft/kurse', { name: 'X', plattformen: ['automatenlab'] })).status, 400);
   const state = crypto.randomBytes(16).toString('base64url');

@@ -1,5 +1,5 @@
 'use strict';
-// Test-Plattform „Testlabor“: kleinste vertragsgemäße Plattform (VERTRAG.md v1.1, §5–§7) zum Ende-zu-Ende-Prüfen des
+// Test-Plattform „Testlabor“: kleinste vertragsgemäße Plattform (VERTRAG.md v1.2, §5–§7) zum Ende-zu-Ende-Prüfen des
 // Portals. Zugleich Referenz für docs/INTEGRATION.md – jede Prüfung hier MUSS auch eine echte Plattform machen.
 // Daten liegen nur im Arbeitsspeicher. Nicht für den Betrieb gedacht.
 
@@ -62,17 +62,18 @@ function createTestplattform(o) {
 
   /* ---------- Manifest und Healthcheck (§7, §6) ---------- */
   const manifest = () => ({
-    vertrag: '1.1',
+    vertrag: '1.2',
     id,
     name: 'Testlabor',
     titel: 'Testlabor – Prüfstand für den Verbund',
     themenfeld: 'Prüfung des Portals',
     kurs: 'nur für automatische Tests',
+    niveaus: ['eA', 'gA'],
     beschreibung: 'Kleinste vertragsgemäße Plattform: SSO-Empfänger und Verbund-API.',
     farbe: '#548235',
     version: '1.0.0',
     basis: o.basis,
-    urls: { start: '/', gast: '/gast', themen: '/themen', lehrkraft: '/lehrer', datenschutz: '/datenschutz', healthz: '/healthz', ssoStart: '/sso/start', ssoEnde: '/sso/ende' },
+    urls: { start: '/', gast: '/gast', themen: '/themen', lehrkraft: '/lehrer', datenschutz: '/datenschutz', healthz: '/healthz', ssoStart: '/sso/start', ssoEnde: '/sso/ende', niveaus: '/niveaus' },
     auth: { modus: o.modus || 'beides', portal: o.portalUrl, sso: true },
     umfang: { welten: 1, level: 1, aufgaben: 3, bosse: 0 },
     faehigkeiten: ['gast']
@@ -82,7 +83,7 @@ function createTestplattform(o) {
     res.json(manifest());
   });
   app.get('/healthz', (req, res) => res.json({ status: 'ok', version: '1.0.0' }));
-  for (const p of ['/gast', '/themen', '/lehrer', '/datenschutz']) app.get(p, (req, res) => res.type('text').send(`Testlabor ${p}\n`));
+  for (const p of ['/gast', '/themen', '/lehrer', '/datenschutz', '/niveaus']) app.get(p, (req, res) => res.type('text').send(`Testlabor ${p}\n`));
 
   app.get('/', (req, res) => {
     const k = sitzung(req);

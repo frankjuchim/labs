@@ -9,6 +9,14 @@ const { ValidationError, NotFoundError, ConflictError } = V;
 const TIMEOUT_MS = 8000;
 const MAX_ANTWORT = 256 * 1024;
 const URL_SCHLUESSEL = ['start', 'gast', 'themen', 'lehrkraft', 'datenschutz', 'healthz'];
+const NIVEAUS = ['eA', 'gA'];
+
+/** Niveaus aus dem Manifest (Vertrag §7, KANN); ohne Angabe gilt die Regel aus §9: jedes Lab ist für eA und gA. */
+function niveausAus(wert) {
+  if (!Array.isArray(wert)) return [...NIVEAUS];
+  const n = NIVEAUS.filter((x) => wert.some((w) => typeof w === 'string' && w.toLowerCase() === x.toLowerCase()));
+  return n.length ? n : [...NIVEAUS];
+}
 
 function createPlattformen(ctx) {
   const { db } = ctx;
@@ -103,7 +111,8 @@ function createPlattformen(ctx) {
       urls,
       auth: m.auth && typeof m.auth === 'object' ? { modus: t(m.auth.modus, 20), sso: m.auth.sso === true } : { modus: 'lokal', sso: false },
       umfang: m.umfang && typeof m.umfang === 'object' ? m.umfang : null,
-      faehigkeiten: Array.isArray(m.faehigkeiten) ? m.faehigkeiten.filter((f) => typeof f === 'string').slice(0, 40) : []
+      faehigkeiten: Array.isArray(m.faehigkeiten) ? m.faehigkeiten.filter((f) => typeof f === 'string').slice(0, 40) : [],
+      niveaus: niveausAus(m.niveaus)
     };
   }
 
@@ -171,7 +180,8 @@ function createPlattformen(ctx) {
           farbe: p.farbe,
           vorlaeufig: p.vorlaeufig,
           basis: p.basis,
-          links: { start: link('start') || p.basis + '/', gast: link('gast'), themen: link('themen'), datenschutz: link('datenschutz') },
+          links: { start: link('start') || p.basis + '/', gast: link('gast'), themen: link('themen'), datenschutz: link('datenschutz'), niveaus: link('niveaus') },
+          niveaus: niveausAus(p.niveaus),
           sso: !p.vorlaeufig && !!(p.auth && p.auth.sso) && !!p.ruecksprung,
           umfang: p.umfang
         };

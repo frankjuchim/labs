@@ -291,6 +291,16 @@ details > summary { cursor: pointer; font-weight: 600; color: var(--primaer); mi
 .chip.glas { background: rgba(255, 255, 255, 0.18); color: inherit; border: 1px solid rgba(255, 255, 255, 0.35); backdrop-filter: blur(4px); }
 .chip .punkt { width: 9px; height: 9px; border-radius: 50%; background: var(--pf, var(--primaer)); }
 
+/* Niveau-Leiste unten auf den Plattform-Karten */
+.niveau-leiste { margin: 0.6rem -1.25rem -1.25rem; padding: 0.75rem 1.25rem; border-top: 1px dashed var(--linie); background: linear-gradient(180deg, rgba(244, 246, 250, 0.6), rgba(244, 246, 250, 1)); display: flex; flex-wrap: wrap; align-items: center; gap: 0.45rem; border-radius: 0 0 var(--radius) var(--radius); }
+.niveau-titel { font-family: var(--titel); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--leise); margin-right: 0.15rem; }
+.niveau { font-family: var(--titel); font-weight: 700; font-size: 0.92rem; padding: 0.12rem 0.6rem; border-radius: 8px; color: #fff; cursor: help; }
+.niveau-ea { background: linear-gradient(135deg, var(--primaer), #2F7D8C); }
+.niveau-ga { background: linear-gradient(135deg, var(--gruen), #7BAA55); }
+.niveau-text { font-size: 0.85rem; color: var(--leise); }
+.niveau-link { margin-left: auto; font-size: 0.85rem; font-weight: 600; text-decoration: none; }
+.niveau-link:hover { text-decoration: underline; }
+
 /* ---------- Band „Für Lehrkräfte“ ---------- */
 .lehrkraft-band { background: linear-gradient(120deg, #fff 0%, #fff 55%, var(--primaer-hell) 100%); border-radius: 22px; box-shadow: var(--schatten); padding: 1.6rem 1.6rem; display: grid; grid-template-columns: 1fr auto; gap: 1.2rem; align-items: center; border: 1px solid rgba(11, 27, 46, 0.05); }
 .lehrkraft-band ul { margin: 0.4rem 0 0; padding-left: 1.1rem; color: var(--leise); }

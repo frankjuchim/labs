@@ -2,7 +2,7 @@
 
 Diese Anleitung beschreibt Schritt für Schritt, was eine Plattform des Verbunds (z. B. Algo Quest) tun muss, damit
 sich Lehrkräfte und Schüler über das Portal **https://labs.frankjuchim.de** anmelden und das Portal Löschungen und
-Kursänderungen weitergeben kann. Verbindlich ist der Vertrag [`VERTRAG.md`](../VERTRAG.md) (Version 1.1); diese Datei
+Kursänderungen weitergeben kann. Verbindlich ist der Vertrag [`VERTRAG.md`](../VERTRAG.md) (Version 1.2); diese Datei
 setzt ihn um und nennt die Werte des Portals. Eine lauffähige Referenz ist die **Test-Plattform**
 `test/testplattform/app.js` (rund 250 Zeilen) – jede Prüfung dort muss auch die echte Plattform machen.
 
@@ -27,7 +27,9 @@ DNS oder das Portal stört, einen eigenen Schlüssel unterschieben.
 ## 2. Manifest ergänzen (§7)
 
 ```js
-urls: { …, ssoStart: '/sso/start', ssoEnde: '/sso/ende' },   // ssoEnde: KANN (ab v1.1)
+urls: { …, ssoStart: '/sso/start', ssoEnde: '/sso/ende', niveaus: '/themen#niveaus' },   // ssoEnde: KANN (ab v1.1), niveaus: SOLL (ab v1.2)
+niveaus: ['eA', 'gA'],   // KANN (ab v1.2), ohne Angabe gilt eA und gA
+kurs: 'Informatik eA und gA, Niedersachsen, Abitur ab 2027',
 auth: { modus: 'beides', portal: process.env.PORTAL_URL, sso: true }
 ```
 

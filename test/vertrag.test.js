@@ -29,3 +29,18 @@ test('Test-Plattform meldet die aktuelle Vertragsversion; Doku verweist auf exis
     }
   }
 });
+
+test('Vertragsprüfung: niveaus und urls.niveaus (ab v1.2) – optional, aber wenn vorhanden gültig', () => {
+  const { pruefeManifest } = require('../scripts/vertrag_pruefen');
+  const basis = {
+    vertrag: '1.2', id: 'beispiel', name: 'B', titel: 'B', themenfeld: 'T', kurs: 'K', beschreibung: 'D', version: '1', basis: 'https://b.example',
+    urls: { start: '/', gast: '/gast', themen: '/themen', lehrkraft: '/l', datenschutz: '/d', healthz: '/healthz' },
+    auth: { modus: 'lokal', sso: false }, umfang: { aufgaben: 1 }, faehigkeiten: ['gast']
+  };
+  assert.deepEqual(pruefeManifest(basis), [], 'ohne niveaus gültig (v1.0/v1.1-Plattformen)');
+  assert.deepEqual(pruefeManifest({ ...basis, niveaus: ['eA', 'gA'], urls: { ...basis.urls, niveaus: '/themen#niveaus' } }), []);
+  assert.deepEqual(pruefeManifest({ ...basis, niveaus: ['gA'] }), []);
+  assert.equal(pruefeManifest({ ...basis, niveaus: ['LK'] }).length, 1);
+  assert.equal(pruefeManifest({ ...basis, niveaus: [] }).length, 1);
+  assert.equal(pruefeManifest({ ...basis, urls: { ...basis.urls, niveaus: 'themen' } }).length, 1);
+});

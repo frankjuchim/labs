@@ -65,9 +65,23 @@
         p.titel && p.titel !== p.name ? h('p', { class: 'untertitel' }, p.titel) : null,
         h('p', { class: 'beschreibung' }, p.beschreibung || ''),
         h('div', { class: 'umfang' }, zahl(u.welten, ' Welten'), zahl(u.level, ' Level'), zahl(u.aufgaben, ' Aufgaben'), zahl(u.bosse, ' Bosse')),
-        p.kurs ? h('p', { class: 'klein leise' }, p.kurs) : null,
-        h('div', { class: 'aktionen' }, knoepfe)
+        h('div', { class: 'aktionen' }, knoepfe),
+        niveauLeiste(p)
       )
+    );
+  }
+
+  /** Niveau-Leiste unten auf der Karte: für welche Anforderungsniveaus das Lab gedacht ist (Vertrag §9). */
+  function niveauLeiste(p) {
+    const titel = { eA: 'erhöhtes Anforderungsniveau (Leistungskurs)', gA: 'grundlegendes Anforderungsniveau (Grundkurs)' };
+    const niveaus = Array.isArray(p.niveaus) && p.niveaus.length ? p.niveaus : ['eA', 'gA'];
+    return h(
+      'div',
+      { class: 'niveau-leiste' },
+      h('span', { class: 'niveau-titel' }, 'Niveau'),
+      niveaus.map((n) => h('span', { class: 'niveau niveau-' + n.toLowerCase(), title: titel[n] || n }, n)),
+      h('span', { class: 'niveau-text' }, niveaus.length > 1 ? 'für Leistungs- und Grundkurs' : niveaus[0] === 'eA' ? 'für den Leistungskurs' : 'für den Grundkurs'),
+      p.links && p.links.niveaus ? h('a', { class: 'niveau-link', href: p.links.niveaus }, 'Was ist für welches Niveau? →') : null
     );
   }
 

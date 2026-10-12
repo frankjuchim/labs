@@ -13,7 +13,7 @@ Ziel: https://labs.frankjuchim.de (CapRover, `captain-definition` + `Dockerfile`
 
 ## Verbindliche Grundlage
 
-- **Vertrag = [`VERTRAG.md`](VERTRAG.md) in diesem Repo (Version 1.1, maßgeblich für Portal und alle Plattformen;
+- **Vertrag = [`VERTRAG.md`](VERTRAG.md) in diesem Repo (Version 1.2, maßgeblich für Portal und alle Plattformen;
   §n entspricht dem früheren README Teil H.n in AlgoQuest).** Rollen §4, SSO §5, Verbund-API §6, Manifest §7,
   Konfiguration §8, gemeinsame Regeln §9, Datenschutz §10, Übergang §11. Nie still abweichen: Änderungen nur in
   `VERTRAG.md`, mit Frank abgestimmt, neuer Versionsnummer und Eintrag in §14 – erst den Vertrag ändern, dann bauen.

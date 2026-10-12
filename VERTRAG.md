@@ -1,12 +1,12 @@
-# Der Plattform-Verbund InfoLabs – Vertrag v1.1
+# Der Plattform-Verbund InfoLabs – Vertrag v1.2
 
-> **Status:** Vertrag **v1.1 (verbindlich)**. Maßgeblich ist diese Datei im Repository **`frankjuchim/labs`**
+> **Status:** Vertrag **v1.2 (verbindlich)**. Maßgeblich ist diese Datei im Repository **`frankjuchim/labs`**
 > (Portal InfoLabs). Sie löst README Teil H im Repository `frankjuchim/AlgoQuest` ab (dort Fassung v1.0); die
 > Abschnittsnummern sind gleich geblieben: **§n entspricht H.n**. Änderungen werden **nur hier** gemacht – mit
 > Erhöhung der Versionsnummer und einem Eintrag in §14.
 >
 > **Verweis aus einer Plattform:** „Verbindlich ist der Vertrag des Plattform-Verbunds:
-> https://github.com/frankjuchim/labs/blob/main/VERTRAG.md (Version 1.1)“.
+> https://github.com/frankjuchim/labs/blob/main/VERTRAG.md (Version 1.2)“.
 >
 > **An Claude:** Wenn du eine Plattform des Verbunds oder das Portal baust, ist dieser Vertrag verbindlich. **MUSS** =
 > Pflicht, **SOLL** = Regelfall (Abweichung nur mit Begründung im README der Plattform), **KANN** = freiwillig.
@@ -181,19 +181,21 @@ Das Portal baut daraus seine Übersicht und prüft die Vertragsversion. Beispiel
 
 ```json
 {
-  "vertrag": "1.1",
+  "vertrag": "1.2",
   "id": "algoquest",
   "name": "Algo Quest",
   "titel": "Algo Quest – Das Dungeon der Datenstrukturen",
   "themenfeld": "Algorithmik und Datenstrukturen",
-  "kurs": "Informatik eA (LK), Niedersachsen, Abitur ab 2027",
+  "kurs": "Informatik eA und gA, Niedersachsen, Abitur ab 2027",
+  "niveaus": ["eA", "gA"],
   "beschreibung": "Übungsplattform mit automatisch geprüften Aufgaben im Abitur-Stil …",
   "farbe": "#1F4E79",
   "version": "2.5.0",
   "basis": "https://algoquest.frankjuchim.de",
   "icon": "/static/favicon.svg",
   "urls": { "start": "/", "gast": "/gast", "themen": "/themen", "lehrkraft": "/lehrer",
-            "datenschutz": "/datenschutz", "healthz": "/healthz", "ssoStart": "/sso/start", "ssoEnde": "/sso/ende" },
+            "datenschutz": "/datenschutz", "healthz": "/healthz", "ssoStart": "/sso/start", "ssoEnde": "/sso/ende",
+            "niveaus": "/themen#niveaus" },
   "auth": { "modus": "beides", "portal": "https://labs.frankjuchim.de", "sso": true },
   "umfang": { "welten": 7, "level": 36, "aufgaben": 388, "bosse": 7 },
   "welten": [{ "nr": 0, "titel": "Die Akademie", "farbe": "#7F6000", "level": 6 }, "…"],
@@ -207,6 +209,9 @@ Pflichtfelder prüft `scripts/vertrag_pruefen.js` (§12): `vertrag`, `id`, `name
 (bei `sso: true` auch `urls.ssoStart`), `umfang`, `faehigkeiten` (mit `gast`).
 `urls.ssoEnde` (KANN): Pfad des SSO-Rücksprungs; das Portal schlägt `basis + urls.ssoEnde` als Rücksprung-Adresse vor
 (der Superadmin bestätigt sie). Das Portal verlinkt Schüler mit „Weiter zu …“ auf `basis + urls.ssoStart`.
+`niveaus` (KANN, ab v1.2): Liste aus `"eA"` und/oder `"gA"` – für welche Anforderungsniveaus die Plattform gedacht ist;
+ohne Angabe gilt `["eA", "gA"]` (§9). `urls.niveaus` (SOLL, ab v1.2): Pfad der Übersicht „Was ist für welches Niveau?“
+(§9). Das Portal zeigt beides unten auf der Plattform-Karte.
 Das Manifest enthält **nie** Kurs-, Schüler- oder Lösungsdaten. Neue Felder sind erlaubt (Nebenversion), Umbenennen
 oder Entfernen nur mit neuer Hauptversion. Plattformen nach v1.0 bleiben gültig.
 
@@ -239,6 +244,10 @@ Das Portal selbst nutzt `PORTAL_URL`, `PORTAL_PRIVATE_KEY` (Ed25519, PKCS#8 – 
   (gleiches Schema: Nummer, Kurztitel, Erläuterung); Gastmodus `/gast` mit eigenen Demo-Aufgaben; Themenseite
   `/themen` ohne Lösungen; Abitur-Stil (Schüler duzen, Prüfungsaufgaben siezen); Begriffe „Kurs“, „Kurscode“,
   „persönlicher Code“, „Lehrkraft“, „Warm-up“, „Team“; Punkte nur automatisch (keine Erfahrungspunkte-Währung).
+- **Anforderungsniveaus (ab v1.2):** Jede Plattform ist für **eA und gA** gedacht und zeigt in einer klaren Übersicht,
+  welche Welten, Level, Aufgaben und Materialien für welches Niveau sind (z. B. Kennzeichnung „eA“ an eA-Inhalten,
+  Filter oder Tabelle). Die Übersicht ist ohne Anmeldung erreichbar (z. B. auf der Themenseite) und steht im Manifest
+  unter `urls.niveaus` (SOLL); das Feld `kurs` nennt beide Niveaus.
 - **Vergleichbarkeit im Portal:** gleiche Punkteformel `round(punkte × max(0.25, 1 − 0.25·Fehlversuche − 0.2·Tipps))`,
   Standardpunkte 10/20/30 je Stufe, gleiche Rangschwellen (0/10/30/55/80 % der Level-Punkte der freigeschalteten Welten).
 - **Inhaltsformat:** Aufgaben im Format von `docs/AUFGABENFORMAT.md` (Algo Quest); neue Blocktypen/Interaktionen sind
@@ -331,10 +340,11 @@ vorläufiger Eintrag: nur Link, kein SSO).
 
 ```
 Wir bauen <Name>, eine Plattform des Verbunds InfoLabs für <Themenfeld> (Informatik Oberstufe, Niedersachsen).
-Verbindlich ist der Vertrag https://github.com/frankjuchim/labs/blob/main/VERTRAG.md (Version 1.1); die
+Verbindlich ist der Vertrag https://github.com/frankjuchim/labs/blob/main/VERTRAG.md (Version 1.2); die
 Anschlussanleitung steht in docs/INTEGRATION.md desselben Repos. Muster für Aufbau, Stil und Qualitätssicherung ist
 frankjuchim/AlgoQuest (README Teil G, CLAUDE.md). Anmeldung nur über das Portal (AUTH_MODUS=portal, SSO nach §5),
-Manifest nach §7, Verbund-API nach §6. Lies zuerst den Vertrag, dann schlage einen Plan vor.
+Manifest nach §7, Verbund-API nach §6. Das Lab ist für eA und gA – mit Niveau-Übersicht nach §9.
+Lies zuerst den Vertrag, dann schlage einen Plan vor.
 ```
 
 ## §14 Änderungen am Vertrag
@@ -343,3 +353,4 @@ Manifest nach §7, Verbund-API nach §6. Lies zuerst den Vertrag, dann schlage e
 |---|---|---|
 | 1.0 | 2026-10 | erste Fassung (AlgoQuest-README Teil H): Portal + Plattformen, zentrale Konten (auch Schüler), SSO mit Ed25519-JWT, Verbund-API, Manifest, Konfiguration, gemeinsame Regeln, Übergang Algo Quest |
 | 1.1 | 2026-10 | Umzug in das Portal-Repo `frankjuchim/labs` (`VERTRAG.md`); Portal-Adresse festgelegt; `state`-Format, Fehlerseite statt Weiterleitung; `kid` und mehrere öffentliche Schlüssel (Schlüsselwechsel); feste Schlüssel-URLs; Kurse im Token für Superadmin und Mitlehrkräfte; Abmelde-Rücksprung nur zu eingetragenen Plattformen; feste `zweck`-Werte; Format der Kursübersicht; Aufträge nur an `beides`/`portal`; `urls.ssoEnde`; Kurs-Ablaufdatum; Export-/Zuordnungsformat der Datenübernahme (§11 allgemein) |
+| 1.2 | 2026-10 | Anforderungsniveaus: jede Plattform ist für eA und gA und zeigt eine Niveau-Übersicht (§9); Manifest-Felder `niveaus` (KANN) und `urls.niveaus` (SOLL), vom Portal unten auf den Plattform-Karten angezeigt (§7) |
