@@ -2,7 +2,7 @@
 
 Diese Anleitung beschreibt Schritt für Schritt, was eine Plattform des Verbunds (z. B. Algo Quest) tun muss, damit
 sich Lehrkräfte und Schüler über das Portal **https://labs.frankjuchim.de** anmelden und das Portal Löschungen und
-Kursänderungen weitergeben kann. Verbindlich ist der Vertrag [`VERTRAG.md`](../VERTRAG.md) (Version 1.2); diese Datei
+Kursänderungen weitergeben kann. Verbindlich ist der Vertrag [`VERTRAG.md`](../VERTRAG.md) (Version 1.3); diese Datei
 setzt ihn um und nennt die Werte des Portals. Eine lauffähige Referenz ist die **Test-Plattform**
 `test/testplattform/app.js` (rund 250 Zeilen) – jede Prüfung dort muss auch die echte Plattform machen.
 
@@ -27,14 +27,17 @@ DNS oder das Portal stört, einen eigenen Schlüssel unterschieben.
 ## 2. Manifest ergänzen (§7)
 
 ```js
-urls: { …, ssoStart: '/sso/start', ssoEnde: '/sso/ende', niveaus: '/themen#niveaus' },   // ssoEnde: KANN (ab v1.1), niveaus: SOLL (ab v1.2)
+vertrag: '1.3',
+urls: { …, ssoStart: '/sso/start', ssoEnde: '/sso/ende', niveaus: '/themen#niveaus' },   // ssoStart: SOLL (Standard /sso/start), ssoEnde: KANN, niveaus: SOLL
+faehigkeiten: ['gast', 'themen', …],   // bekannte Namen in Vertrag §7, z. B. sql-konsole, live
 niveaus: ['eA', 'gA'],   // KANN (ab v1.2), ohne Angabe gilt eA und gA
 kurs: 'Informatik eA und gA, Niedersachsen, Abitur ab 2027',
 auth: { modus: 'beides', portal: process.env.PORTAL_URL, sso: true }
 ```
 
-Das Portal zeigt `basis + urls.ssoStart` als Link „Weiter zu …“ für Schüler; `urls.ssoEnde` schlägt es dem Superadmin
-als Rücksprung-Adresse vor.
+Das Portal verlinkt die Plattform überall („Weiter zu …“, „Öffnen“ auf den Plattform-Karten) mit
+`basis + urls.ssoStart` (ohne Angabe `<basis>/sso/start`); `urls.ssoEnde` schlägt es dem Superadmin als
+Rücksprung-Adresse vor.
 
 ## 3. SSO-Empfänger (§5)
 
@@ -43,6 +46,12 @@ Den Baustein `src/jwt.js` aus diesem Repository **unverändert kopieren** (nur `
 (`exp − iat ≤ maxDauerSek`, abgelaufen) und das Format von `jti`; `JtiSpeicher` merkt verwendete `jti` bis zum Ablauf.
 
 ### 3.1 `GET /sso/start?ziel=<pfad>`
+
+**Ab v1.3 startet `/sso/start` immer neu – auch mit bestehender Sitzung** (nicht „schon angemeldet → weiter auf
+`ziel`“). Die bestehende Sitzung bleibt bis zur erfolgreichen Prüfung des neuen Tokens unangetastet (3.2 Schritt 7);
+schlägt der Rücksprung fehl, bleibt sie, wie sie war. So kennt die Plattform nach jedem Wechsel aus dem Portal die
+aktuellen Kurse (z. B. nach dem Beitritt zu einem zweiten Kurs). `/sso/start` braucht keine Anmeldung und antwortet
+immer mit 302 zum Portal – das prüft `scripts/vertrag_pruefen.js`.
 
 1. `state` = 16 Byte Zufall, base64url (22 Zeichen). Das Portal verlangt **mindestens 22 Zeichen** aus `A–Z a–z 0–9 - _ . ~`.
 2. Cookie setzen: `aq_sso_state=<state>` – `httpOnly`, `SameSite=Lax`, `secure`, `Max-Age=600`, signiert.
@@ -60,15 +69,23 @@ Antwort immer mit `Referrer-Policy: no-referrer` und `Cache-Control: no-store`; 
 (auch nicht in Zugriffsprotokollen – ggf. Query-String im Log abschneiden).
 
 1. State-Cookie lesen und **sofort löschen**; fehlt er oder ist `state ≠ Cookie` → ablehnen (401, Fehlerseite).
-2. `fehler=keine_berechtigung` → Seite „Kein Zugang – deine Lehrkraft hat diese Plattform für deinen Kurs nicht
-   freigeschaltet“; `fehler=abgebrochen` → zurück zur Startseite (Gastmodus anbieten).
+2. `fehler=keine_berechtigung` → Seite (Status 403) mit dem rollenneutralen Text (die Plattform weiß hier nicht, wer
+   anfragt) und einem Link zurück zum Portal (`PORTAL_URL`), **ohne** eine Sitzung zu setzen oder zu ändern:
+
+   > **Kein Zugang.** Diese Plattform ist für dieses Konto noch nicht freigeschaltet.
+   > Schülerinnen und Schüler: Die Lehrkraft muss die Plattform im Portal für den Kurs freischalten.
+   > Lehrkräfte: Die Freischaltung der Plattform erteilt die Administration im Portal; danach die Plattform beim Kurs
+   > ankreuzen.
+
+   `fehler=abgebrochen` → zurück zur Startseite (Gastmodus anbieten).
 3. `pruefe(token, PORTAL_PUBLIC_KEY, { iss: PORTAL_URL, aud: PLATTFORM_ID, maxDauerSek: 120 })`; bei `ok: false` → 401.
 4. `jti` merken (`JtiSpeicher.merke(jti, exp)`); schon bekannt → 401 („wiederverwendet“).
 5. Inhalt prüfen: `sub` passt zu `^[asl]:\d+$`, `rolle ∈ {schueler, lehrkraft, superadmin}`, `kurse` ist eine Liste.
 6. **Upsert nach `sub`**: Anzeigename aktualisieren; Kurse aus `kurse` anlegen bzw. umbenennen (unbekannte Kurse mit
    Standard-Einstellungen); Mitgliedschaften abgleichen – fehlt ein Kurs im Token, verliert das Konto den Zugang
    dazu (Lernstand bleibt bis zur Löschung).
-7. Eigene Sitzung setzen (Schüler ≤ 30 Tage, Lehrkräfte ≤ 8 h), dann 302 auf `ziel` (nur relative Pfade).
+7. Eigene Sitzung setzen bzw. eine bestehende **erst jetzt** ersetzen (Schüler ≤ 30 Tage, Lehrkräfte ≤ 8 h), dann
+   302 auf `ziel` (nur relative Pfade). Bei jedem Fehler in den Schritten 1–6 bleibt eine bestehende Sitzung unverändert.
 
 Inhalt eines Tokens (Beispiel, `exp − iat = 90 s`):
 
@@ -98,7 +115,7 @@ Jede Anfrage trägt `Authorization: Bearer <JWT>` mit `iss = PORTAL_URL`, `aud =
 |---|---|---|
 | `POST /api/verbund/loeschen` `{ "sub": "s:1042" }` oder `{ "kurs": "k:17" }` | `loeschen` | `{ "geloescht": n }` – idempotent, innerhalb der Anfrage erledigt |
 | `GET /api/verbund/kurse/:kursId/uebersicht` (`kursId` URL-kodiert, `k%3A17`) | `kurs-uebersicht` | siehe unten; unbekannter Kurs → 404 |
-| `POST /api/verbund/kurse/:kursId` `{ "name"?: "…", "aktiv"?: false }` | `kurs-aendern` | `{ "ok": true }`; `aktiv: false` → Kurs sperren, `true` → entsperren |
+| `POST /api/verbund/kurse/:kursId` `{ "name"?: "…", "aktiv"?: false }` | `kurs-aendern` | `{ "ok": true }`; `aktiv: false` → Kurs sperren, `true` → entsperren; **unbekannter Kurs → mit Standard-Einstellungen anlegen, 200** (ab v1.3, nicht 404 – sonst läuft der Auftrag in Wiederholungen) |
 
 Prüfung: `pruefe(token, PORTAL_PUBLIC_KEY, { iss: PORTAL_URL, aud: PLATTFORM_ID, maxDauerSek: 60 })`, dann
 `sub === 'portal'`, `zweck` passt zum Endpunkt, `jti` einmalig (eigener `JtiSpeicher`). Sonst **401** ohne Details.
@@ -130,10 +147,14 @@ Fehlern (Netz, 5xx, 401) wiederholt es nach 1, 5, 30 Minuten … bis etwa 6 Tage
 | falsches `iss` | 401 |
 | **wiederverwendet** (gleiches Token ein zweites Mal) | 401 |
 | state fehlt oder ≠ Cookie | 401 |
-| `fehler=keine_berechtigung` / `abgebrochen` | verständliche Seite, keine Sitzung |
+| `fehler=keine_berechtigung` / `abgebrochen` | verständliche, rollenneutrale Seite mit Link zum Portal, keine Sitzung |
+| `/sso/start` mit bestehender Sitzung | 302 zum Portal (nicht direkt auf `ziel`) |
+| bestehende Sitzung, danach Rücksprung mit ungültigem Token | 401, alte Sitzung gilt weiter |
+| bestehende Sitzung, Schüler tritt im Portal einem zweiten Kurs bei, erneut `/sso/start` | Plattform kennt beide Kurse |
 | `ziel=//boese.example` | Weiterleitung auf `/` |
 | Verbund-API: ohne Token, falsches `aud`, falscher `zweck`, `exp − iat > 60 s`, wiederverwendet | 401 |
 | `loeschen` zweimal mit derselben `sub` | beide 200, zweites Mal `geloescht: 0` |
+| `kurs-aendern` für einen unbekannten Kurs | 200, Kurs angelegt |
 
 Vorlage für Tokens in Tests: `signiere(nutzlast, privateKey)` aus `src/jwt.js` mit einem Testschlüssel
 (`crypto.generateKeyPairSync('ed25519')`) – siehe `test/sso.test.js` und `test/verbund.test.js` in diesem Repository.
