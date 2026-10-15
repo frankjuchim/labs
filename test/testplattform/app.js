@@ -1,5 +1,5 @@
 'use strict';
-// Test-Plattform „Testlabor“: kleinste vertragsgemäße Plattform (VERTRAG.md v1.3, §5–§7) zum Ende-zu-Ende-Prüfen des
+// Test-Plattform „Testlabor“: kleinste vertragsgemäße Plattform (VERTRAG.md v1.4, §5–§7) zum Ende-zu-Ende-Prüfen des
 // Portals. Zugleich Referenz für docs/INTEGRATION.md – jede Prüfung hier MUSS auch eine echte Plattform machen.
 // Daten liegen nur im Arbeitsspeicher. Nicht für den Betrieb gedacht.
 
@@ -71,7 +71,7 @@ function createTestplattform(o) {
 
   /* ---------- Manifest und Healthcheck (§7, §6) ---------- */
   const manifest = () => ({
-    vertrag: '1.3',
+    vertrag: '1.4',
     id,
     name: 'Testlabor',
     titel: 'Testlabor – Prüfstand für den Verbund',

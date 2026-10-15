@@ -1,12 +1,12 @@
-# Der Plattform-Verbund InfoLabs – Vertrag v1.3
+# Der Plattform-Verbund InfoLabs – Vertrag v1.4
 
-> **Status:** Vertrag **v1.3 (verbindlich)**. Maßgeblich ist diese Datei im Repository **`frankjuchim/labs`**
+> **Status:** Vertrag **v1.4 (verbindlich)**. Maßgeblich ist diese Datei im Repository **`frankjuchim/labs`**
 > (Portal InfoLabs). Sie löst README Teil H im Repository `frankjuchim/AlgoQuest` ab (dort Fassung v1.0); die
 > Abschnittsnummern sind gleich geblieben: **§n entspricht H.n**. Änderungen werden **nur hier** gemacht – mit
 > Erhöhung der Versionsnummer und einem Eintrag in §14.
 >
 > **Verweis aus einer Plattform:** „Verbindlich ist der Vertrag des Plattform-Verbunds:
-> https://github.com/frankjuchim/labs/blob/main/VERTRAG.md (Version 1.3)“.
+> https://github.com/frankjuchim/labs/blob/main/VERTRAG.md (Version 1.4)“.
 >
 > **An Claude:** Wenn du eine Plattform des Verbunds oder das Portal baust, ist dieser Vertrag verbindlich. **MUSS** =
 > Pflicht, **SOLL** = Regelfall (Abweichung nur mit Begründung im README der Plattform), **KANN** = freiwillig.
@@ -131,6 +131,10 @@ In Konfigurationen heißt die Portal-Adresse `PORTAL_URL` = `https://labs.frankj
 ```
 
 - `rolle`: `schueler` | `lehrkraft` | `superadmin`. `kurse[].rolle`: `mitglied` | `lehrkraft`.
+  `kurse[].inhaber` (ab v1.4, KANN ausgewertet werden): `true` bei Kursen, deren Inhaberin bzw. Inhaber das Konto ist;
+  bei Mitlehrkräften, Schülern und fremden Kursen des Superadmins fehlt das Feld. Plattformen, die es nicht kennen,
+  ignorieren es; wer zwischen Inhaberin und Mitlehrkraft unterscheidet (z. B. Kurs-Einstellungen nur für die
+  Inhaberin), nutzt dieses Feld.
   `kurse` enthält **nur** Kurse, die diese Plattform freigeschaltet haben:
   - Schüler: seine Kurse (`mitglied`); ohne solchen Kurs gibt es kein Token (`fehler=keine_berechtigung`).
   - Lehrkraft: Kurse als Inhaberin **und** als Mitlehrkraft (`lehrkraft`); ohne Freischaltung kein Token.
@@ -169,6 +173,10 @@ Ohne gültiges Token (auch bei falschem `zweck`): `401`. Antworten sind JSON. `:
 | `GET /api/verbund/kurse/:kursId/uebersicht` | `kurs-uebersicht` | **SOLL** | Kennzahlen für das Portal (Format unten); unbekannter Kurs: `404`. **Keine** Antworten, Lösungen oder Freitexte |
 | `POST /api/verbund/kurse/:kursId` `{ "name"?: "…", "aktiv"?: false }` | `kurs-aendern` | **SOLL** | Kurs umbenannt bzw. Plattform für den Kurs ab-/wieder eingeschaltet → übernehmen bzw. Kurs sperren/entsperren; ist der Kurs der Plattform unbekannt, legt sie ihn mit Standard-Einstellungen an und antwortet `200` (nicht `404`), damit der Auftrag nicht in Wiederholungen läuft (ab v1.3) |
 
+**Gesperrter Kurs** (`aktiv: false`, SOLL ab v1.4): Schülerinnen und Schüler haben keinen Zugang zum Kurs (Hinweis
+„Dieser Kurs ist zurzeit gesperrt.“), Lehrkräfte sehen ihn nur lesend (keine Freischaltungen, Kämpfe, Live-Runden),
+das Beamer-Board des Kurses ist aus. Der Lernstand bleibt vollständig erhalten; `aktiv: true` hebt die Sperre auf.
+
 Antwort der Kursübersicht (`anteil` = Anteil an den Level-Punkten der freigeschalteten Welten, 0…1):
 
 ```json
@@ -178,7 +186,9 @@ Antwort der Kursübersicht (`anteil` = Anteil an den Level-Punkten der freigesch
 ```
 
 Das Portal sendet Löschungen und Kursänderungen nur an Plattformen, deren Manifest `auth.modus` = `beides` oder
-`portal` meldet, als Auftrag mit Wiederholung bei Fehlern (1, 5, 30, 120 Minuten … insgesamt etwa 6 Tage).
+`portal` meldet, als Auftrag mit Wiederholung bei Fehlern (nach 1, 5, 30, 120, 360, 720 Minuten, dann täglich –
+höchstens 12 Versuche über insgesamt etwa 6 Tage); danach gilt der Auftrag als fehlgeschlagen und erscheint im
+Admin-Bereich.
 
 ## §7 Plattform-Manifest (MUSS)
 
@@ -187,7 +197,7 @@ Das Portal baut daraus seine Übersicht und prüft die Vertragsversion. Beispiel
 
 ```json
 {
-  "vertrag": "1.3",
+  "vertrag": "1.4",
   "id": "algoquest",
   "name": "Algo Quest",
   "titel": "Algo Quest – Das Dungeon der Datenstrukturen",
@@ -255,6 +265,11 @@ Das Portal selbst nutzt `PORTAL_URL`, `PORTAL_PRIVATE_KEY` (Ed25519, PKCS#8 – 
   Schülerinnen und Schülern ausführen, tun das isoliert von der Plattform-Datenbank (eigener Prozess/Worker, flüchtige
   oder schreibgeschützte Übungsdaten, Zeit- und Größenlimits) und senden keine Lösungsdaten in Prüfantworten zurück
   (ab v1.3).
+- **Beamer-Board (KANN, Muster ab v1.4):** Ein Board ohne Anmeldung ist nur über einen geheimen Link je Kurs-ID
+  erreichbar (Geheimnis mit mindestens 128 Bit Zufall, nicht aus der Kurs-ID ableitbar), den die Lehrkraft jederzeit
+  erneuern kann (der alte Link wird sofort ungültig). Das Board antwortet mit `X-Robots-Tag: noindex` und
+  `Referrer-Policy: no-referrer`, zeigt nur Anzeigenamen und Kennzahlen (keine Antworten oder Lösungen) und ist aus,
+  solange der Kurs gesperrt ist (§6).
 - **Datenschutz:** nur Anzeigename (Empfehlung „Vorname + Initial“), `sub`, Kurs-IDs und Lernstand auf der Plattform;
   keine Klarnamen in Beispieldaten, Screenshots, Tests, Materialien, Videos; Löschung auf Anforderung des Portals.
 - **Didaktik und Begriffe:** Welt → Level (1 je DS) → Arbeitsblatt + Lab + Boss; Fallen-Liste P1–P10 des Themas
@@ -327,8 +342,9 @@ Eine Plattform, die schon eigene Konten hat (wie Algo Quest), geht in Phasen üb
 - Jedes Schüler-Konto der Plattform wird ein eigenes Portal-Konto (auch wenn dieselbe Person in mehreren Kursen war).
 - Der Import ist idempotent (erneuter Lauf legt nichts doppelt an) und hat einen Probelauf.
 
-Stand der Plattformen: Algo Quest – Phase 0 umgesetzt (2.5.0). AutomatenLab – noch ohne Manifest (im Portal als
-vorläufiger Eintrag: nur Link, kein SSO).
+Stand der Plattformen (2026-10): Algo Quest läuft mit `beides` (Phase 1; Datenübernahme ins Portal erledigt).
+AutomatenLab, Datendetektei und Kryptos sind mit Manifest und SSO angeschlossen (`portal`). Den aktuellen Stand
+zeigt das Portal unter *Plattformen* (Prüfung alle 6 Stunden).
 
 ## §12 Vertragsprüfung
 
@@ -363,7 +379,7 @@ vorläufiger Eintrag: nur Link, kein SSO).
 
 ```
 Wir bauen <Name>, eine Plattform des Verbunds InfoLabs für <Themenfeld> (Informatik Oberstufe, Niedersachsen).
-Verbindlich ist der Vertrag https://github.com/frankjuchim/labs/blob/main/VERTRAG.md (Version 1.3); die
+Verbindlich ist der Vertrag https://github.com/frankjuchim/labs/blob/main/VERTRAG.md (Version 1.4); die
 Anschlussanleitung steht in docs/INTEGRATION.md desselben Repos. Muster für Aufbau, Stil und Qualitätssicherung ist
 frankjuchim/AlgoQuest (README Teil G, CLAUDE.md). Anmeldung nur über das Portal (AUTH_MODUS=portal, SSO nach §5),
 Manifest nach §7, Verbund-API nach §6. Das Lab ist für eA und gA – mit Niveau-Übersicht nach §9.
@@ -378,3 +394,4 @@ Lies zuerst den Vertrag, dann schlage einen Plan vor.
 | 1.1 | 2026-10 | Umzug in das Portal-Repo `frankjuchim/labs` (`VERTRAG.md`); Portal-Adresse festgelegt; `state`-Format, Fehlerseite statt Weiterleitung; `kid` und mehrere öffentliche Schlüssel (Schlüsselwechsel); feste Schlüssel-URLs; Kurse im Token für Superadmin und Mitlehrkräfte; Abmelde-Rücksprung nur zu eingetragenen Plattformen; feste `zweck`-Werte; Format der Kursübersicht; Aufträge nur an `beides`/`portal`; `urls.ssoEnde`; Kurs-Ablaufdatum; Export-/Zuordnungsformat der Datenübernahme (§11 allgemein) |
 | 1.2 | 2026-10 | Anforderungsniveaus: jede Plattform ist für eA und gA und zeigt eine Niveau-Übersicht (§9); Manifest-Felder `niveaus` (KANN) und `urls.niveaus` (SOLL), vom Portal unten auf den Plattform-Karten angezeigt (§7) |
 | 1.3 | 2026-10 | §13.2 eigene Codebasis zulässig (Kern in eigenem Ordner); §7 Liste bekannter Fähigkeiten (u. a. `sql-konsole`, `live`) und `urls.ssoStart`; §6 unbekannter Kurs bei `kurs-aendern` → anlegen, `200`; §9 Sandbox-Regel für ausgeführten Schüler-Code; §5 Einstieg aus dem Portal über `/sso/start` holt immer ein frisches Token; `INTEGRATION.md` rollenneutraler Text für `keine_berechtigung` |
+| 1.4 | 2026-10 | §5 optionales Feld `kurse[].inhaber` (Inhaberin vs. Mitlehrkraft); §6 Bedeutung „Kurs gesperrt“ (`aktiv: false`) als SOLL, Wiederholung der Aufträge auf 12 Versuche (etwa 6 Tage) festgelegt; §9 Muster Beamer-Board mit erneuerbarem geheimen Link (KANN); §11 Stand der Plattformen aktualisiert |
