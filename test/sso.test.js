@@ -162,8 +162,14 @@ test('Portal: Schüler ohne Kurs auf der Plattform → keine_berechtigung; Abbre
   assert.equal(r.searchParams.get('fehler'), 'keine_berechtigung');
   assert.equal(r.searchParams.get('token'), null);
   const ende = await b.anfrage(r.href);
-  assert.equal(ende.status, 401);
-  assert.match(await ende.text(), /portal:keine_berechtigung/);
+  assert.equal(ende.status, 403);
+  assert.equal(ende.headers.get('set-cookie').includes('tp_sitzung'), false, 'keine Sitzung');
+  const text = await ende.text();
+  assert.match(text, /Kein Zugang\./);
+  assert.match(text, /Schülerinnen und Schüler: Die Lehrkraft muss die Plattform im Portal für den Kurs freischalten\./);
+  assert.match(text, /Lehrkräfte: Die Freischaltung der Plattform erteilt die Administration im Portal/);
+  assert.ok(text.includes(`href="${v.portalUrl}/"`), 'Link zurück zum Portal');
+  assert.ok(v.tp.locals.daten.abgelehnt.includes('portal:keine_berechtigung'));
 
   // Abbrechen auf der Anmeldeseite (ohne Sitzung)
   const neu = new H.Browser();
@@ -217,4 +223,44 @@ test('Öffentlicher Schlüssel unter fester URL (PEM und JSON)', async () => {
   assert.equal(j.pem, pem);
   assert.equal(j.alg, 'EdDSA');
   assert.equal(crypto.createPublicKey(pem).asymmetricKeyType, 'ed25519');
+});
+
+test('/sso/start startet mit bestehender Sitzung neu: zweiter Kurs ist danach bekannt (§5, ab v1.3)', async () => {
+  const b = await schueler('Zweikurs');
+  assert.equal((await b.besuche(`${v.tpUrl}/sso/start`)).antwort.status, 200);
+  let ich = await (await b.anfrage(v.tpUrl + '/api/ich')).json();
+  assert.deepEqual(ich.kurse.map((k) => k.id), [kurs.kursId]);
+  // im Portal einem zweiten Kurs beitreten (gleiches Konto)
+  const k2 = (await api(admin, 'POST', '/api/lehrkraft/kurse', { name: 'GK 11', plattformen: ['testlabor'] })).body;
+  const beitritt = await api(b, 'POST', '/api/schueler/kurse', { kurscode: k2.code });
+  assert.equal(beitritt.status, 201, JSON.stringify(beitritt.body));
+  // trotz Sitzung: /sso/start leitet zum Portal (nicht direkt auf ziel)
+  const start = await b.anfrage(`${v.tpUrl}/sso/start`);
+  assert.equal(start.status, 302);
+  assert.ok(start.headers.get('location').startsWith(v.portalUrl + '/sso/autorisieren?'));
+  assert.equal((await b.besuche(`${v.tpUrl}/sso/start`)).antwort.status, 200);
+  ich = await (await b.anfrage(v.tpUrl + '/api/ich')).json();
+  assert.deepEqual(ich.kurse.map((k) => k.id).sort(), [kurs.kursId, k2.kursId].sort());
+  assert.ok(v.tp.locals.daten.kurse.get(k2.kursId).mitglieder.has(ich.sub));
+});
+
+test('Fehlgeschlagener Rücksprung lässt die bestehende Sitzung unverändert (§5, ab v1.3)', async () => {
+  const b = await schueler('Bleibtdrin');
+  assert.equal((await b.besuche(`${v.tpUrl}/sso/start`)).antwort.status, 200);
+  const vorher = await (await b.anfrage(v.tpUrl + '/api/ich')).json();
+  // ungültiges Token
+  const r = await holeRuecksprung(b);
+  r.searchParams.set('token', signiere({ iss: v.portalUrl, aud: 'testlabor', sub: 's:999', rolle: 'schueler', name: 'X', kurse: [], iat: 0, exp: 90, jti: crypto.randomUUID(), v: 1 }, neuesPaar()));
+  const ende = await b.anfrage(r.href);
+  assert.equal(ende.status, 401);
+  assert.equal((ende.headers.get('set-cookie') || '').includes('tp_sitzung'), false);
+  // abgebrochen
+  const r2 = await holeRuecksprung(b);
+  const ab = new URL(r2.href);
+  for (const k of ['token', 'ziel']) ab.searchParams.delete(k);
+  ab.searchParams.set('fehler', 'abgebrochen');
+  assert.equal((await b.anfrage(ab.href)).status, 401);
+  const nachher = await b.anfrage(v.tpUrl + '/api/ich');
+  assert.equal(nachher.status, 200);
+  assert.deepEqual(await nachher.json(), vorher);
 });

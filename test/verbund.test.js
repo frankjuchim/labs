@@ -70,6 +70,28 @@ test('Kurs umbenennen und Plattform abschalten → POST /api/verbund/kurse/:kurs
   assert.deepEqual(prot.map((p) => [p.name, p.aktiv]), [['Neuer Name', undefined], ['Neuer Name', false]]);
 });
 
+test('kurs-aendern für einen der Plattform unbekannten Kurs → anlegen, 200 (§6, ab v1.3)', async () => {
+  const jetzt = Math.floor(Date.now() / 1000);
+  const token = signiere({ iss: v.portalUrl, aud: 'testlabor', sub: 'portal', zweck: 'kurs-aendern', iat: jetzt, exp: jetzt + 60, jti: crypto.randomUUID(), v: 1 }, H.SCHLUESSEL);
+  assert.equal(v.tp.locals.daten.kurse.has('k:9999'), false);
+  const r = await fetch(v.tpUrl + '/api/verbund/kurse/' + encodeURIComponent('k:9999'), {
+    method: 'POST', headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' }, body: JSON.stringify({ name: 'Neu im Portal' })
+  });
+  assert.equal(r.status, 200);
+  assert.deepEqual(await r.json(), { ok: true });
+  const k = v.tp.locals.daten.kurse.get('k:9999');
+  assert.equal(k.name, 'Neu im Portal');
+  assert.equal(k.aktiv, true);
+  // über den Auftragsweg: Kurs ohne vorherigen SSO-Kontakt umbenennen → Auftrag „erledigt“ (keine Wiederholung)
+  const kk = (await api(admin, 'POST', '/api/lehrkraft/kurse', { name: 'Nie besucht', plattformen: ['testlabor'] })).body;
+  assert.equal(v.tp.locals.daten.kurse.has(kk.kursId), false);
+  await api(admin, 'PATCH', `/api/lehrkraft/kurse/${kk.id}`, { name: 'Nie besucht 2' });
+  await verarbeite();
+  const a = (await api(admin, 'GET', '/api/admin/auftraege')).body.auftraege.filter((x) => x.zweck === 'kurs-aendern' && String(x.pfad).includes(encodeURIComponent(kk.kursId)));
+  assert.ok(a.length > 0 && a.every((x) => x.status === 'erledigt'), JSON.stringify(a));
+  assert.equal(v.tp.locals.daten.kurse.get(kk.kursId).name, 'Nie besucht 2');
+});
+
 test('Kursübersicht: Kennzahlen der Plattform mit Namen aus dem Portal', async () => {
   const k = (await api(admin, 'POST', '/api/lehrkraft/kurse', { name: 'Übersichtskurs', plattformen: ['testlabor'] })).body;
   const b = await schuelerMitSso(k.code, 'Fleißig');

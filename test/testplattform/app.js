@@ -8,6 +8,15 @@ const express = require('express');
 const { pruefe, JtiSpeicher } = require('../../src/jwt');
 
 const STATE_COOKIE = 'tp_state';
+// Rollenneutraler Text bei fehler=keine_berechtigung (docs/INTEGRATION.md §3.2, ab v1.3) – die Plattform weiß hier nicht,
+// wer anfragt.
+const KEIN_ZUGANG = [
+  'Kein Zugang.',
+  'Diese Plattform ist für dieses Konto noch nicht freigeschaltet.',
+  'Schülerinnen und Schüler: Die Lehrkraft muss die Plattform im Portal für den Kurs freischalten.',
+  'Lehrkräfte: Die Freischaltung der Plattform erteilt die Administration im Portal; danach die Plattform beim Kurs ankreuzen.'
+];
+const esc = (t) => String(t).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 const SITZUNG_COOKIE = 'tp_sitzung';
 
 /**
@@ -92,7 +101,8 @@ function createTestplattform(o) {
 
   /* ---------- SSO (§5) ---------- */
 
-  // Schritt 1: Weiterleitung zum Portal mit state (≥ 128 bit) im kurzlebigen Cookie
+  // Schritt 1: Weiterleitung zum Portal mit state (≥ 128 bit) im kurzlebigen Cookie. Startet IMMER neu, auch mit
+  // bestehender Sitzung (§5, ab v1.3) – die Sitzung bleibt bis zu einem gültigen Token unverändert.
   app.get('/sso/start', (req, res) => {
     const state = crypto.randomBytes(16).toString('base64url');
     const ziel = typeof req.query.ziel === 'string' && /^\/(?![/\\])/.test(req.query.ziel) ? req.query.ziel : '/';
@@ -105,7 +115,8 @@ function createTestplattform(o) {
     res.redirect(302, u.href);
   });
 
-  // Schritt 4: Token prüfen, Konto upserten, Kurse abgleichen, eigene Sitzung setzen, auf ziel weiterleiten
+  // Schritt 4: Token prüfen, Konto upserten, Kurse abgleichen, eigene Sitzung setzen, auf ziel weiterleiten.
+  // Jeder Fehler lässt eine bestehende Sitzung unverändert (kein Set-Cookie für die Sitzung).
   app.get('/sso/ende', (req, res) => {
     res.set('Referrer-Policy', 'no-referrer');
     res.set('Cache-Control', 'no-store');
@@ -116,6 +127,14 @@ function createTestplattform(o) {
     const state = lies(req, STATE_COOKIE);
     res.append('Set-Cookie', `${STATE_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0`);
     if (!state || req.query.state !== state) return ablehnen('state');
+    if (req.query.fehler === 'keine_berechtigung') {
+      daten.abgelehnt.push('portal:keine_berechtigung');
+      return res
+        .status(403)
+        .type('html')
+        .send(`<!doctype html><meta charset="utf-8"><title>Kein Zugang</title>\n<h1>${esc(KEIN_ZUGANG[0])}</h1>\n` +
+          KEIN_ZUGANG.slice(1).map((z) => `<p>${esc(z)}</p>\n`).join('') + `<p><a href="${esc(o.portalUrl)}/">Zurück zum Portal</a></p>\n`);
+    }
     if (req.query.fehler) return ablehnen('portal:' + String(req.query.fehler));
     const p = pruefe(req.query.token, o.portalPublicKey, { iss: o.portalUrl, aud: id, maxDauerSek: 120, jetztSek: jetztSek() });
     if (!p.ok) return ablehnen(p.grund);
@@ -124,6 +143,8 @@ function createTestplattform(o) {
     if (!/^[asl]:\d+$/.test(t.sub) || !['schueler', 'lehrkraft', 'superadmin'].includes(t.rolle) || !Array.isArray(t.kurse)) return ablehnen('inhalt');
     // Upsert nach sub; Kurse aus dem Token übernehmen (fehlende Kurse: Zugang entfällt, Daten bleiben)
     daten.konten.set(t.sub, { sub: t.sub, rolle: t.rolle, name: t.name, kurse: t.kurse.map((k) => ({ id: k.id, rolle: k.rolle })) });
+    const imToken = new Set(t.kurse.map((k) => k.id));
+    for (const k of daten.kurse.values()) if (!imToken.has(k.id)) k.mitglieder.delete(t.sub);
     for (const k of t.kurse) {
       const kurs = daten.kurse.get(k.id) || { id: k.id, name: k.name, aktiv: true, mitglieder: new Set() };
       kurs.name = k.name;
@@ -197,6 +218,7 @@ function createTestplattform(o) {
     });
   });
 
+  // Unbekannter Kurs → mit Standard-Einstellungen anlegen und 200 (§6, ab v1.3), damit der Auftrag nicht wiederholt wird
   app.post('/api/verbund/kurse/:kursId', verbund('kurs-aendern'), (req, res) => {
     const b = req.body || {};
     const k = daten.kurse.get(req.params.kursId) || { id: req.params.kursId, name: '', aktiv: true, mitglieder: new Set() };
