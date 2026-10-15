@@ -2,7 +2,7 @@
 
 Diese Anleitung beschreibt Schritt für Schritt, was eine Plattform des Verbunds (z. B. Algo Quest) tun muss, damit
 sich Lehrkräfte und Schüler über das Portal **https://labs.frankjuchim.de** anmelden und das Portal Löschungen und
-Kursänderungen weitergeben kann. Verbindlich ist der Vertrag [`VERTRAG.md`](../VERTRAG.md) (Version 1.3); diese Datei
+Kursänderungen weitergeben kann. Verbindlich ist der Vertrag [`VERTRAG.md`](../VERTRAG.md) (Version 1.4); diese Datei
 setzt ihn um und nennt die Werte des Portals. Eine lauffähige Referenz ist die **Test-Plattform**
 `test/testplattform/app.js` (rund 250 Zeilen) – jede Prüfung dort muss auch die echte Plattform machen.
 
@@ -97,6 +97,8 @@ Inhalt eines Tokens (Beispiel, `exp − iat = 90 s`):
 
 - Lehrkraft: `rolle: "lehrkraft"`, `kurse[].rolle: "lehrkraft"` (eigene Kurse **und** Kurse als Mitlehrkraft, jeweils
   nur Kurse, die diese Plattform nutzen). Eine Lehrkraft ohne Freischaltung bekommt kein Token (`keine_berechtigung`).
+  Eigene Kurse tragen zusätzlich `"inhaber": true` (ab v1.4); bei Kursen als Mitlehrkraft fehlt das Feld. Unbekannte
+  Felder in `kurse[]` ignorieren, nicht ablehnen.
 - Superadmin: `rolle: "superadmin"`, `sub: "a:<n>"`, `kurse` = alle Kurse mit dieser Plattform (`rolle: "lehrkraft"`).
 - Schüler ohne Kurs auf dieser Plattform: kein Token (`keine_berechtigung`).
 
@@ -115,7 +117,7 @@ Jede Anfrage trägt `Authorization: Bearer <JWT>` mit `iss = PORTAL_URL`, `aud =
 |---|---|---|
 | `POST /api/verbund/loeschen` `{ "sub": "s:1042" }` oder `{ "kurs": "k:17" }` | `loeschen` | `{ "geloescht": n }` – idempotent, innerhalb der Anfrage erledigt |
 | `GET /api/verbund/kurse/:kursId/uebersicht` (`kursId` URL-kodiert, `k%3A17`) | `kurs-uebersicht` | siehe unten; unbekannter Kurs → 404 |
-| `POST /api/verbund/kurse/:kursId` `{ "name"?: "…", "aktiv"?: false }` | `kurs-aendern` | `{ "ok": true }`; `aktiv: false` → Kurs sperren, `true` → entsperren; **unbekannter Kurs → mit Standard-Einstellungen anlegen, 200** (ab v1.3, nicht 404 – sonst läuft der Auftrag in Wiederholungen) |
+| `POST /api/verbund/kurse/:kursId` `{ "name"?: "…", "aktiv"?: false }` | `kurs-aendern` | `{ "ok": true }`; `aktiv: false` → Kurs sperren (SOLL ab v1.4: Schüler ohne Zugang, Lehrkräfte nur lesend, Beamer-Board aus, Lernstand bleibt), `true` → entsperren; **unbekannter Kurs → mit Standard-Einstellungen anlegen, 200** (ab v1.3, nicht 404 – sonst läuft der Auftrag in Wiederholungen) |
 
 Prüfung: `pruefe(token, PORTAL_PUBLIC_KEY, { iss: PORTAL_URL, aud: PLATTFORM_ID, maxDauerSek: 60 })`, dann
 `sub === 'portal'`, `zweck` passt zum Endpunkt, `jti` einmalig (eigener `JtiSpeicher`). Sonst **401** ohne Details.
@@ -133,7 +135,13 @@ Kursübersicht (Format nach §6) – **keine** Antworten, Lösungen oder Freitex
 Das Portal zeigt nur `sub`s, die Mitglied des Kurses sind, und ergänzt die Namen selbst.
 
 Das Portal sendet Aufträge nur an Plattformen, deren Manifest `auth.modus` = `beides` oder `portal` meldet; bei
-Fehlern (Netz, 5xx, 401) wiederholt es nach 1, 5, 30 Minuten … bis etwa 6 Tage.
+Fehlern (Netz, 5xx, 401) wiederholt es nach 1, 5, 30, 120, 360, 720 Minuten, dann täglich – höchstens 12 Versuche über
+etwa 6 Tage; danach steht der Auftrag im Admin-Bereich als „fehlgeschlagen“ und kann dort neu angestoßen werden.
+Endpunkte deshalb idempotent bauen.
+
+**Beamer-Board (KANN, Muster nach §9):** geheimer Link je Kurs (≥ 128 Bit Zufall, z. B.
+`/board/<kurs-id-kodiert>/<geheimnis>`), von der Lehrkraft erneuerbar, `X-Robots-Tag: noindex`,
+`Referrer-Policy: no-referrer`, nur Anzeigenamen und Kennzahlen, aus bei gesperrtem Kurs.
 
 ## 5. Testfälle (§12) – müssen in den Tests der Plattform stehen
 

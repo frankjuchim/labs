@@ -38,12 +38,12 @@ Weitere Regeln:
   gelöscht – im Portal und auf allen Plattformen.
 - **Mitlehrkräfte** verwalten Schüler und sehen Kennzahlen; Plattformen, Ablaufdatum, Einladungen und Löschen bleiben
   bei der Inhaberin bzw. dem Inhaber des Kurses.
-- **Vorläufige Plattformen** (ohne Manifest, z. B. AutomatenLab bis zur Umstellung) erscheinen nur als Link – kein SSO,
+- **Vorläufige Plattformen** (ohne Manifest) erscheinen nur als Link – kein SSO,
   nicht für Kurse wählbar. „Jetzt prüfen“ stellt sie automatisch um, sobald ein gültiges Manifest kommt.
 
 ## 2. Verbund
 
-**Verbindlich für Portal und Plattformen ist der Vertrag [`VERTRAG.md`](VERTRAG.md) (Version 1.3)** in diesem
+**Verbindlich für Portal und Plattformen ist der Vertrag [`VERTRAG.md`](VERTRAG.md) (Version 1.4)** in diesem
 Repository. Er löst README Teil H im Repo `frankjuchim/AlgoQuest` ab (Abschnittsnummern gleich: §n = H.n) und regelt
 Rollen (§4), Single Sign-on mit Ed25519-JWT (§5), Verbund-API (§6), Plattform-Manifest (§7), Konfiguration (§8),
 gemeinsame Regeln (§9), Datenschutz (§10) und den Übergang bestehender Plattformen (§11). Änderungen nur dort, mit neuer
@@ -51,7 +51,7 @@ Version und Eintrag in §14.
 
 **Verweis aus einer neuen Plattform** (README und CLAUDE.md):
 „Verbindlich ist der Vertrag des Plattform-Verbunds: https://github.com/frankjuchim/labs/blob/main/VERTRAG.md
-(Version 1.3); Anschluss nach https://github.com/frankjuchim/labs/blob/main/docs/INTEGRATION.md.“
+(Version 1.4); Anschluss nach https://github.com/frankjuchim/labs/blob/main/docs/INTEGRATION.md.“
 
 | Thema | Umsetzung im Portal |
 |---|---|
@@ -70,8 +70,12 @@ Bekannte Plattformen:
 
 | Plattform | ID | Stand |
 |---|---|---|
-| Algo Quest | `algoquest` | Manifest vertragsgemäß (2.5.0), Anmeldung noch lokal (`AUTH_MODUS=lokal`) – nächster Schritt: Phase 1 nach `docs/INTEGRATION.md`; README Teil H dort auf Verweis kürzen |
-| AutomatenLab | `automatenlab` | noch kein Manifest und kein Login → vorläufiger Eintrag |
+| Algo Quest | `algoquest` | SSO angeschlossen (`AUTH_MODUS=beides`), Datenübernahme ins Portal erledigt |
+| AutomatenLab | `automatenlab` | Manifest und SSO (`portal`) |
+| Datendetektei | `datendetektei` | Manifest und SSO (`portal`) |
+| Kryptos | `kryptos` | Manifest und SSO (`portal`) |
+
+Aktueller Stand jeder Plattform: Portal → *Plattformen* (Prüfung alle 6 Stunden, auf Knopfdruck).
 
 ## 3. Aufbau
 
