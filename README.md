@@ -43,7 +43,7 @@ Weitere Regeln:
 
 ## 2. Verbund
 
-**Verbindlich für Portal und Plattformen ist der Vertrag [`VERTRAG.md`](VERTRAG.md) (Version 1.2)** in diesem
+**Verbindlich für Portal und Plattformen ist der Vertrag [`VERTRAG.md`](VERTRAG.md) (Version 1.3)** in diesem
 Repository. Er löst README Teil H im Repo `frankjuchim/AlgoQuest` ab (Abschnittsnummern gleich: §n = H.n) und regelt
 Rollen (§4), Single Sign-on mit Ed25519-JWT (§5), Verbund-API (§6), Plattform-Manifest (§7), Konfiguration (§8),
 gemeinsame Regeln (§9), Datenschutz (§10) und den Übergang bestehender Plattformen (§11). Änderungen nur dort, mit neuer
@@ -51,12 +51,12 @@ Version und Eintrag in §14.
 
 **Verweis aus einer neuen Plattform** (README und CLAUDE.md):
 „Verbindlich ist der Vertrag des Plattform-Verbunds: https://github.com/frankjuchim/labs/blob/main/VERTRAG.md
-(Version 1.2); Anschluss nach https://github.com/frankjuchim/labs/blob/main/docs/INTEGRATION.md.“
+(Version 1.3); Anschluss nach https://github.com/frankjuchim/labs/blob/main/docs/INTEGRATION.md.“
 
 | Thema | Umsetzung im Portal |
 |---|---|
 | Konten, `sub` | `a:<n>` Superadmin, `l:<n>` Lehrkraft, `s:<n>` Schüler, Kurs-IDs `k:<n>` – nie neu vergeben (`AUTOINCREMENT`) |
-| SSO (§5) | `GET /sso/autorisieren` → Token (EdDSA, `exp − iat = 90 s`, `jti` zufällig 128 bit) an die freigegebene Rücksprung-Adresse; `GET /sso/abbrechen`; `GET /sso/abmelden` |
+| SSO (§5) | `GET /sso/autorisieren` → Token (EdDSA, `exp − iat = 90 s`, `jti` zufällig 128 bit) an die freigegebene Rücksprung-Adresse; `GET /sso/abbrechen`; `GET /sso/abmelden`; Links aus dem Portal („Weiter zu …“, „Öffnen“) gehen ab v1.3 immer auf `basis + urls.ssoStart` (Standard `/sso/start`) und holen so ein frisches Token |
 | Schlüssel | privat nur auf dem Server (`/app/data/portal-schluessel.pem` bzw. `PORTAL_PRIVATE_KEY`); öffentlich unter `/sso/schluessel.pem` und `/api/portal/schluessel` sowie im Superadmin-Bereich |
 | Verbund-API (§6) | Löschung (`loeschen`), Kursänderung (`kurs-aendern`) als Aufträge mit Wiederholung; Kursübersicht (`kurs-uebersicht`) sofort |
 | Manifest (§7, §12) | `scripts/vertrag_pruefen.js` (maßgebliche Fassung); Prüfung beim Eintragen, auf Knopfdruck und alle 6 h |

@@ -22,10 +22,8 @@ function schuelerRoutes({ svc }) {
       ...k,
       plattformen: k.plattformen.filter((pid) => plattformen[pid]).map((pid) => {
         const p = plattformen[pid];
-        const full = svc.plattformen.get(pid);
-        // Einstieg: über den SSO-Start der Plattform (sie leitet zum Portal und zurück), sonst ihre Startseite
-        const sso = p.sso && full.urls && full.urls.ssoStart;
-        return { id: pid, name: p.name, titel: p.titel, themenfeld: p.themenfeld, farbe: p.farbe, link: sso ? p.basis + full.urls.ssoStart : p.links.start, sso: !!sso };
+        // Einstieg: über den SSO-Start der Plattform (holt immer ein frisches Token, §5 ab v1.3), sonst ihre Startseite
+        return { id: pid, name: p.name, titel: p.titel, themenfeld: p.themenfeld, farbe: p.farbe, link: p.links.einstieg, sso: p.sso };
       })
     }));
     res.json({ name: s.name, code: s.code, kurse });

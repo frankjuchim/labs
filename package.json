@@ -1,6 +1,6 @@
 {
   "name": "infolabs-portal",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "InfoLabs – Portal des Plattform-Verbunds für den Informatikunterricht der Oberstufe (Konten, Kurse, Single Sign-on)",
   "private": true,
   "main": "src/server.js",

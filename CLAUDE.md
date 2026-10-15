@@ -13,13 +13,13 @@ Ziel: https://labs.frankjuchim.de (CapRover, `captain-definition` + `Dockerfile`
 
 ## Verbindliche Grundlage
 
-- **Vertrag = [`VERTRAG.md`](VERTRAG.md) in diesem Repo (Version 1.2, maßgeblich für Portal und alle Plattformen;
+- **Vertrag = [`VERTRAG.md`](VERTRAG.md) in diesem Repo (Version 1.3, maßgeblich für Portal und alle Plattformen;
   §n entspricht dem früheren README Teil H.n in AlgoQuest).** Rollen §4, SSO §5, Verbund-API §6, Manifest §7,
   Konfiguration §8, gemeinsame Regeln §9, Datenschutz §10, Übergang §11. Nie still abweichen: Änderungen nur in
   `VERTRAG.md`, mit Frank abgestimmt, neuer Versionsnummer und Eintrag in §14 – erst den Vertrag ändern, dann bauen.
 - `scripts/vertrag_pruefen.js` und `src/jwt.js` sind die maßgeblichen Fassungen, die Plattformen unverändert kopieren;
   Änderungen daran sind Vertragsänderungen.
-- Die Plattform-Repos (`frankjuchim/AlgoQuest`, `frankjuchim/AutomatenLab`) werden aus diesem Repo heraus **nicht**
+- Die Plattform-Repos (`frankjuchim/AlgoQuest`, `frankjuchim/AutomatenLab`, Datendetektei) werden aus diesem Repo heraus **nicht**
   geändert – nur mit ausdrücklicher Genehmigung. Was Plattformen tun müssen, steht in `docs/INTEGRATION.md`.
 - Stil, Arbeitsweise und Sicherheitsregeln wie in Algo Quest (dortige CLAUDE.md und README Teil F, G.4).
 

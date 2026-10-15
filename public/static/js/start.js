@@ -45,7 +45,7 @@
     const knoepfe = [];
     if (p.links.gast) knoepfe.push(h('a', { class: 'knopf gold klein', href: p.links.gast }, 'Gastmodus'));
     if (p.links.themen) knoepfe.push(h('a', { class: 'knopf hell klein', href: p.links.themen }, 'Themen'));
-    knoepfe.push(h('a', { class: 'knopf hell klein', href: p.links.start }, p.vorlaeufig ? 'Zur Plattform' : 'Öffnen'));
+    knoepfe.push(h('a', { class: 'knopf hell klein', href: p.links.einstieg || p.links.start }, p.vorlaeufig ? 'Zur Plattform' : 'Öffnen'));
     const u = p.umfang || {};
     const zahl = (n, wort) => (Number.isInteger(n) && n > 0 ? h('span', null, h('b', null, n), wort) : null);
     return h(

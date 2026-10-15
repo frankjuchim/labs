@@ -192,6 +192,26 @@ async function main() {
     await lk.waitForSelector('.kurskarte');
     await bild(lk, 'lehrkraft_kurse.png');
 
+    /* 7b. Mit bestehender Plattform-Sitzung einem zweiten Kurs beitreten → erneuter Wechsel aus dem Portal holt ein
+           frisches Token, die Plattform kennt danach beide Kurse (Vertrag §5 ab v1.3) */
+    await lk.goto(portalUrl + '/lehrkraft#/kurse');
+    await lk.fill('#k-name', 'Informatik GK 12');
+    await lk.click('#form-neu button[type="submit"]');
+    await lk.waitForURL(/#\/kurs\/\d+/);
+    await lk.waitForSelector('.kurskopf:has-text("Informatik GK 12")');
+    const kurscode2 = (await lk.textContent('.kurskopf .code-gross')).trim();
+    await s1.goto(portalUrl + '/schueler');
+    const kurseVorher = (await (await s1.request.get(tpUrl + '/api/ich')).json()).kurse.length;
+    assert.equal(kurseVorher, 1);
+    await s1.fill('#d-kurscode', kurscode2);
+    await s1.click('#form-dazu button[type="submit"]');
+    await s1.waitForSelector('#kurse >> text=Informatik GK 12');
+    assert.equal(await s1.getAttribute('a.weiter >> nth=0', 'href'), tpUrl + '/sso/start');
+    await s1.click('a.weiter >> nth=0');
+    await s1.waitForURL(tpUrl + '/');
+    const ich = await (await s1.request.get(tpUrl + '/api/ich')).json();
+    assert.equal(ich.kurse.length, 2, 'Plattform kennt nach erneutem Wechsel beide Kurse');
+
     /* 8. Öffentliche Startseite mit Plattformen (Tablet + Smartphone) */
     const gast = await neueSeite(TABLET);
     await gast.goto(portalUrl + '/');
