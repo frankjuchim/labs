@@ -194,7 +194,16 @@ test('Lehrkraft: nur mit Freischaltung; Token enthält eigene Kurse als lehrkraf
   const t = decode(r.searchParams.get('token'));
   assert.equal(t.rolle, 'lehrkraft');
   assert.equal(t.sub, 'l:' + id);
-  assert.deepEqual(t.kurse, [{ id: k.kursId, name: 'GK 12', rolle: 'lehrkraft' }]);
+  assert.deepEqual(t.kurse, [{ id: k.kursId, name: 'GK 12', rolle: 'lehrkraft', inhaber: true }]);
+  // Mitlehrkraft im Kurs des Admins: Kurs ohne inhaber (§5 ab v1.4)
+  const ein = await api(admin, 'POST', `/api/lehrkraft/kurse/${kurs.id}/einladungen`, { email: 'sso@schule.example' });
+  assert.equal(ein.status, 201, JSON.stringify(ein.body));
+  const eid = (await api(lk, 'GET', '/api/lehrkraft/einladungen')).body.einladungen[0].id;
+  assert.equal((await api(lk, 'POST', `/api/lehrkraft/einladungen/${eid}`, { annehmen: true })).status, 200);
+  r = await holeRuecksprung(lk);
+  const tm = decode(r.searchParams.get('token'));
+  assert.deepEqual(tm.kurse.find((x) => x.id === kurs.kursId), { id: kurs.kursId, name: kurs.name || 'LK Informatik 13', rolle: 'lehrkraft' });
+  assert.equal(tm.kurse.find((x) => x.id === k.kursId).inhaber, true);
   // Superadmin: alle Kurse der Plattform
   const ra = await holeRuecksprung(admin);
   const ta = decode(ra.searchParams.get('token'));
@@ -202,6 +211,8 @@ test('Lehrkraft: nur mit Freischaltung; Token enthält eigene Kurse als lehrkraf
   assert.equal(ta.name, 'Admin', 'Plattformen zeigen den Namen „Admin“');
   assert.match(ta.sub, /^a:\d+$/);
   assert.ok(ta.kurse.some((x) => x.id === k.kursId) && ta.kurse.some((x) => x.id === kurs.kursId));
+  assert.equal(ta.kurse.find((x) => x.id === kurs.kursId).inhaber, true, 'eigener Kurs des Admins');
+  assert.equal('inhaber' in ta.kurse.find((x) => x.id === k.kursId), false, 'fremder Kurs ohne inhaber');
 });
 
 test('Abmelden: Portal-Sitzung endet, Rücksprung nur zu eingetragenen Plattformen', async () => {

@@ -57,11 +57,12 @@ function createSso(ctx, { konten, plattformen }) {
     const r = konto.r;
     const sql =
       r.rolle === 'superadmin'
-        ? `SELECT k.id, k.name FROM kurse k JOIN kurs_plattformen kp ON kp.kurs_id = k.id AND kp.plattform_id = ? AND kp.aktiv = 1 ORDER BY k.id`
-        : `SELECT k.id, k.name FROM kurse k JOIN kurs_plattformen kp ON kp.kurs_id = k.id AND kp.plattform_id = ? AND kp.aktiv = 1
+        ? `SELECT k.id, k.name, k.inhaber_id FROM kurse k JOIN kurs_plattformen kp ON kp.kurs_id = k.id AND kp.plattform_id = ? AND kp.aktiv = 1 ORDER BY k.id`
+        : `SELECT k.id, k.name, k.inhaber_id FROM kurse k JOIN kurs_plattformen kp ON kp.kurs_id = k.id AND kp.plattform_id = ? AND kp.aktiv = 1
            WHERE k.inhaber_id = ? OR k.id IN (SELECT kurs_id FROM kurs_lehrkraefte WHERE lehrkraft_id = ?) ORDER BY k.id`;
     const rows = r.rolle === 'superadmin' ? db.prepare(sql).all(pid) : db.prepare(sql).all(pid, r.id, r.id);
-    return rows.map((k) => ({ id: kursId(k.id), name: k.name, rolle: 'lehrkraft' }));
+    // inhaber (ab v1.4): nur bei eigenen Kursen, sonst weggelassen
+    return rows.map((k) => ({ id: kursId(k.id), name: k.name, rolle: 'lehrkraft', ...(k.inhaber_id === r.id ? { inhaber: true } : {}) }));
   }
 
   /**

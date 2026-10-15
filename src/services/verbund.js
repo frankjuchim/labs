@@ -7,7 +7,8 @@ const crypto = require('node:crypto');
 const { signiere } = require('../jwt');
 
 // Wartezeit vor dem n-ten Wiederholungsversuch (Minuten); danach gilt der Auftrag als fehlgeschlagen.
-const WARTEN_MIN = [1, 5, 30, 120, 360, 720, 1440, 1440, 1440, 1440];
+// Wartezeiten nach dem 1., 2., … Fehlversuch (Minuten); 12 Versuche über etwa 6 Tage (Vertrag §6)
+const WARTEN_MIN = [1, 5, 30, 120, 360, 720, 1440, 1440, 1440, 1440, 1440, 1440];
 const TIMEOUT_MS = 10000;
 const MAX_ANTWORT = 512 * 1024;
 
@@ -200,4 +201,4 @@ function createVerbund(ctx) {
   return { verbundFaehig, plattform, verteile, verarbeite, auftraege, wiederholen, loescheSub, loescheKurs, kursGeaendert, kursUebersicht, aufruf, ZWECK };
 }
 
-module.exports = { createVerbund, ZWECK };
+module.exports = { createVerbund, ZWECK, WARTEN_MIN };

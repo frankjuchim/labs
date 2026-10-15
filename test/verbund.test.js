@@ -123,6 +123,30 @@ test('Aufträge werden wiederholt, wenn die Plattform nicht erreichbar ist', asy
   assert.equal(a.status, 'erledigt');
 });
 
+test('Aufträge: 12 Versuche über etwa 6 Tage, danach fehlgeschlagen (§6 ab v1.4)', async () => {
+  const { WARTEN_MIN } = require('../src/services/verbund');
+  assert.equal(WARTEN_MIN.length, 12);
+  const tage = WARTEN_MIN.slice(0, -1).reduce((a, b) => a + b, 0) / 1440;
+  assert.ok(tage > 5.5 && tage < 6.5, `${tage.toFixed(2)} Tage`);
+  const k = (await api(admin, 'POST', '/api/lehrkraft/kurse', { name: 'Dauerausfall', plattformen: ['testlabor'] })).body;
+  const db = v.portal.locals.ctx.db;
+  db.prepare("UPDATE plattformen SET basis = 'http://127.0.0.1:1' WHERE id = 'testlabor'").run();
+  try {
+    await api(admin, 'DELETE', `/api/lehrkraft/kurse/${k.id}`, { bestaetigung: 'Dauerausfall' });
+    const finde = () => (api(admin, 'GET', '/api/admin/auftraege')).then((r) => r.body.auftraege.find((x) => x.nutzlast && x.nutzlast.kurs === k.kursId));
+    for (let n = 1; n <= 12; n++) {
+      const a = await finde();
+      db.prepare("UPDATE verbund_auftraege SET naechster_versuch = '2000-01-01T00:00:00.000Z' WHERE id = ?").run(a.id);
+      await verarbeite();
+      const b = await finde();
+      assert.equal(b.versuche, n);
+      assert.equal(b.status, n < 12 ? 'offen' : 'fehlgeschlagen', `Versuch ${n}`);
+    }
+  } finally {
+    db.prepare('UPDATE plattformen SET basis = ? WHERE id = ?').run(v.tpUrl, 'testlabor');
+  }
+});
+
 test('Plattform-Seite der Verbund-API: falsches aud, falscher zweck, wiederverwendet → 401', async () => {
   const jetzt = Math.floor(Date.now() / 1000);
   const t = (extra) => signiere({ iss: v.portalUrl, aud: 'testlabor', sub: 'portal', zweck: 'loeschen', iat: jetzt, exp: jetzt + 30, jti: crypto.randomUUID(), v: 1, ...extra }, H.SCHLUESSEL);
