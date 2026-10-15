@@ -5,7 +5,7 @@ const assert = require('node:assert/strict');
 const crypto = require('node:crypto');
 const H = require('./helpers');
 const { signiere } = require('../src/jwt');
-const { pruefeManifest } = require('../scripts/vertrag_pruefen');
+const { pruefeManifest, pruefeSsoStart } = require('../scripts/vertrag_pruefen');
 
 let v;
 let admin;
@@ -39,9 +39,11 @@ async function schuelerMitSso(kurscode, name) {
 test('Manifest der Test-Plattform ist vertragsgemäß (pruefeManifest aus Algo Quest)', async () => {
   const m = await (await fetch(v.tpUrl + '/api/plattform')).json();
   assert.deepEqual(pruefeManifest(m), []);
+  assert.deepEqual(await pruefeSsoStart(v.tpUrl, m), { fehler: [], hinweise: [] }, '/sso/start leitet zum Portal');
   const p = await api(admin, 'GET', '/api/admin/plattformen');
   const tl = p.body.plattformen.find((x) => x.id === 'testlabor');
   assert.equal(tl.status, 'ok', JSON.stringify(tl.pruefung));
+  assert.deepEqual(tl.pruefung.warnungen, [], 'keine Warnung zum SSO-Einstieg');
   assert.equal(tl.version, '1.0.0');
 });
 
@@ -154,6 +156,9 @@ test('Plattform-Verwaltung: ungültige Basis, kein Manifest → vorläufig, Rüc
   assert.equal(al.sso, false);
   assert.equal(al.links.start, 'https://automatenlab.example/');
   assert.equal(oeff.find((p) => p.id === 'testlabor').sso, true);
+  // Einstieg aus dem Portal: SSO-Plattformen immer über /sso/start (§5 ab v1.3), vorläufige über ihre Startseite
+  assert.equal(oeff.find((p) => p.id === 'testlabor').links.einstieg, v.tpUrl + '/sso/start');
+  assert.equal(al.links.einstieg, 'https://automatenlab.example/');
   // Niveaus (Vertrag §7/§9): aus dem Manifest bzw. Standard eA und gA, Link zur Niveau-Übersicht
   assert.deepEqual(oeff.find((p) => p.id === 'testlabor').niveaus, ['eA', 'gA']);
   assert.equal(oeff.find((p) => p.id === 'testlabor').links.niveaus, v.tpUrl + '/niveaus');

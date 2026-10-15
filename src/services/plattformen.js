@@ -3,7 +3,7 @@
 // (scripts/vertrag_pruefen.js aus Algo Quest, unverändert), Rücksprung-Adresse für SSO (Whitelist), Status.
 
 const V = require('../validate');
-const { pruefeManifest } = require('../../scripts/vertrag_pruefen');
+const { pruefeManifest, pruefeSsoStart, ssoStartPfad } = require('../../scripts/vertrag_pruefen');
 
 const { ValidationError, NotFoundError, ConflictError } = V;
 const TIMEOUT_MS = 8000;
@@ -88,6 +88,9 @@ function createPlattformen(ctx) {
         if (h.daten.version !== manifest.version) fehler.push(`healthz.version (${h.daten.version}) ≠ manifest.version (${manifest.version}).`);
       }
       if (manifest.auth && manifest.auth.sso === false) warnungen.push('Die Plattform bietet noch kein SSO an (auth.sso = false).');
+      // SSO-Einstieg (§5 ab v1.3): im Portal nur als Warnung, damit eine eingetragene Plattform nicht ungültig wird
+      const sso = await pruefeSsoStart(basis, manifest, (url, opts) => ctx.fetch(url, { ...opts, signal: AbortSignal.timeout(TIMEOUT_MS) }));
+      warnungen.push(...sso.fehler, ...sso.hinweise);
     }
     return { ok: fehler.length === 0, fehler, warnungen, manifest, healthz, at: iso() };
   }
@@ -170,6 +173,8 @@ function createPlattformen(ctx) {
       .filter((p) => p.aktiv)
       .map((p) => {
         const link = (k) => (p.urls && p.urls[k] ? p.basis + p.urls[k] : null);
+        const sso = !p.vorlaeufig && !!(p.auth && p.auth.sso) && !!p.ruecksprung;
+        const start = link('start') || p.basis + '/';
         return {
           id: p.id,
           name: p.name,
@@ -180,9 +185,10 @@ function createPlattformen(ctx) {
           farbe: p.farbe,
           vorlaeufig: p.vorlaeufig,
           basis: p.basis,
-          links: { start: link('start') || p.basis + '/', gast: link('gast'), themen: link('themen'), datenschutz: link('datenschutz'), niveaus: link('niveaus') },
+          // einstieg: Link aus dem Portal – bei SSO immer über den SSO-Start (holt ein frisches Token, §5 ab v1.3)
+          links: { start, einstieg: sso ? p.basis + ssoStartPfad(p) : start, gast: link('gast'), themen: link('themen'), datenschutz: link('datenschutz'), niveaus: link('niveaus') },
           niveaus: niveausAus(p.niveaus),
-          sso: !p.vorlaeufig && !!(p.auth && p.auth.sso) && !!p.ruecksprung,
+          sso,
           umfang: p.umfang
         };
       });

@@ -44,3 +44,34 @@ test('Vertragsprüfung: niveaus und urls.niveaus (ab v1.2) – optional, aber we
   assert.equal(pruefeManifest({ ...basis, niveaus: [] }).length, 1);
   assert.equal(pruefeManifest({ ...basis, urls: { ...basis.urls, niveaus: 'themen' } }).length, 1);
 });
+
+test('Vertragsprüfung: urls.ssoStart (ab v1.3) optional mit Standard /sso/start; /sso/start ohne Anmeldung → Portal', async () => {
+  const { pruefeManifest, pruefeSsoStart, ssoStartPfad } = require('../scripts/vertrag_pruefen');
+  const portal = 'https://labs.example';
+  const m = {
+    vertrag: '1.3', id: 'beispiel', name: 'B', titel: 'B', themenfeld: 'T', kurs: 'K', beschreibung: 'D', version: '1', basis: 'https://b.example',
+    urls: { start: '/', gast: '/gast', themen: '/themen', lehrkraft: '/l', datenschutz: '/d', healthz: '/healthz' },
+    auth: { modus: 'beides', portal, sso: true }, umfang: { aufgaben: 1 }, faehigkeiten: ['gast', 'sql-konsole', 'live']
+  };
+  assert.deepEqual(pruefeManifest(m), [], 'sso: true ohne urls.ssoStart ist ab v1.3 gültig');
+  assert.equal(ssoStartPfad(m), '/sso/start');
+  assert.equal(ssoStartPfad({ urls: { ssoStart: '/anmelden/portal' } }), '/anmelden/portal');
+  assert.equal(pruefeManifest({ ...m, urls: { ...m.urls, ssoStart: 'sso/start' } }).length, 1);
+  assert.equal(pruefeManifest({ ...m, urls: { ...m.urls, ssoStart: '//boese.example' } }).length, 1);
+
+  const antwort = (status, location) => async (url) => {
+    antwort.letzte = url;
+    return { status, headers: { get: (k) => (k === 'location' ? location || null : null) } };
+  };
+  const zumPortal = `${portal}/sso/autorisieren?plattform=beispiel&ruecksprung=x&state=y`;
+  assert.deepEqual(await pruefeSsoStart(m.basis, m, antwort(302, zumPortal)), { fehler: [], hinweise: [] });
+  assert.equal(antwort.letzte, 'https://b.example/sso/start');
+  assert.equal((await pruefeSsoStart(m.basis, m, antwort(404))).fehler.length, 1, '404 ist ein Fehler');
+  assert.equal((await pruefeSsoStart(m.basis, m, antwort(200))).hinweise.length, 1, '200 nur Hinweis');
+  assert.equal((await pruefeSsoStart(m.basis, m, antwort(302, 'https://boese.example/sso/autorisieren'))).hinweise.length, 1);
+  assert.equal((await pruefeSsoStart(m.basis, m, antwort(302, zumPortal.replace('beispiel', 'anders')))).hinweise.length, 1);
+  const fehlerNetz = async () => { throw new Error('weg'); };
+  assert.deepEqual((await pruefeSsoStart(m.basis, m, fehlerNetz)).fehler, []);
+  // lokal: keine Prüfung (keine bestehende Plattform wird ungültig)
+  assert.deepEqual(await pruefeSsoStart(m.basis, { ...m, auth: { modus: 'lokal', sso: false } }, antwort(404)), { fehler: [], hinweise: [] });
+});

@@ -4,6 +4,7 @@
 // Maßgebliche Fassung: frankjuchim/labs/scripts/vertrag_pruefen.js.
 // Aufruf: node scripts/vertrag_pruefen.js https://algoquest.frankjuchim.de   (oder http://localhost:3000)
 // Ohne Netz nutzbar als Modul: const { pruefeManifest } = require('./scripts/vertrag_pruefen');
+// Mit Netz (ab v1.3): pruefeSsoStart(basis, manifest) – /sso/start leitet ohne Anmeldung zum Portal weiter.
 // Diese Datei wird unverändert in jede Plattform des Verbunds kopiert.
 
 const VERTRAG_HAUPTVERSION = 1;
@@ -25,7 +26,10 @@ function pruefeManifest(m) {
   else {
     if (!['lokal', 'portal', 'beides'].includes(m.auth.modus)) f.push('auth.modus: lokal | portal | beides.');
     if (typeof m.auth.sso !== 'boolean') f.push('auth.sso: true/false fehlt.');
-    if (m.auth.sso && !(m.urls && text(m.urls.ssoStart))) f.push('urls.ssoStart: Pflicht, wenn auth.sso = true.');
+  }
+  // urls.ssoStart: ab v1.3 SOLL mit Standard /sso/start (vorher Pflicht bei sso: true) – wenn angegeben, ein Pfad
+  if (m.urls && typeof m.urls === 'object' && m.urls.ssoStart !== undefined && (!text(m.urls.ssoStart) || !m.urls.ssoStart.startsWith('/') || m.urls.ssoStart.startsWith('//'))) {
+    f.push('urls.ssoStart: Pfad (beginnend mit „/“), Standard /sso/start.');
   }
   if (!m.umfang || typeof m.umfang !== 'object' || !Number.isInteger(m.umfang.aufgaben)) f.push('umfang: { welten, level, aufgaben, bosse } (Ganzzahlen) fehlt.');
   if (m.niveaus !== undefined && (!Array.isArray(m.niveaus) || !m.niveaus.length || m.niveaus.some((n) => !['eA', 'gA'].includes(n)))) {
@@ -35,6 +39,50 @@ function pruefeManifest(m) {
   if (!Array.isArray(m.faehigkeiten)) f.push('faehigkeiten: Liste fehlt (z. B. "gast", "themen", "lehrkraft-materialien").');
   else if (!m.faehigkeiten.includes('gast')) f.push('faehigkeiten: "gast" ist Pflicht (Gastmodus /gast).');
   return f;
+}
+
+/** Pfad des SSO-Einstiegs laut Manifest (Standard /sso/start, §5/§7 ab v1.3). */
+function ssoStartPfad(m) {
+  const p = m && m.urls && m.urls.ssoStart;
+  return typeof p === 'string' && p.startsWith('/') && !p.startsWith('//') ? p : '/sso/start';
+}
+
+/**
+ * Prüft ohne Anmeldung, ob der SSO-Einstieg zum Portal weiterleitet (§5, §12 ab v1.3).
+ * Nur für auth.modus portal/beides. Liefert { fehler: [...], hinweise: [...] }: 404 ist ein Fehler (MUSS),
+ * jede andere Abweichung ein Hinweis.
+ */
+async function pruefeSsoStart(basis, m, holen = fetch) {
+  const fehler = [];
+  const hinweise = [];
+  if (!m || !m.auth || !['portal', 'beides'].includes(m.auth.modus)) return { fehler, hinweise };
+  const pfad = ssoStartPfad(m);
+  let r;
+  try {
+    r = await holen(basis.replace(/\/+$/, '') + pfad, { redirect: 'manual' });
+  } catch (e) {
+    hinweise.push(`SSO-Einstieg ${pfad} nicht erreichbar: ${e.message}`);
+    return { fehler, hinweise };
+  }
+  if (r.status === 404) {
+    fehler.push(`SSO-Einstieg ${pfad} antwortet mit 404 (MUSS bei auth.modus ${m.auth.modus}, §5).`);
+    return { fehler, hinweise };
+  }
+  const ort = r.headers.get('location') || '';
+  let ziel = null;
+  try {
+    ziel = new URL(ort, basis);
+  } catch {
+    /* unten Hinweis */
+  }
+  const portal = typeof m.auth.portal === 'string' ? m.auth.portal.replace(/\/+$/, '') : null;
+  const ziel_ok = ziel && ziel.pathname.endsWith('/sso/autorisieren') && (!portal || ziel.href.startsWith(portal + '/sso/autorisieren'));
+  if (r.status < 300 || r.status >= 400 || !ziel_ok) {
+    hinweise.push(`SSO-Einstieg ${pfad} sollte ohne Anmeldung mit 302 auf ${portal || '<PORTAL_URL>'}/sso/autorisieren weiterleiten (Antwort ${r.status}${ort ? ' → ' + ort.split('?')[0] : ''}).`);
+  } else if (ziel.searchParams.get('plattform') !== m.id) {
+    hinweise.push(`SSO-Einstieg ${pfad}: Parameter plattform (${ziel.searchParams.get('plattform')}) ≠ id (${m.id}).`);
+  }
+  return { fehler, hinweise };
 }
 
 async function main() {
@@ -70,6 +118,13 @@ async function main() {
       fehler.push(`healthz nicht lesbar: ${e.message}`);
     }
   }
+  let hinweise = [];
+  if (m) {
+    const sso = await pruefeSsoStart(basis, m);
+    fehler.push(...sso.fehler);
+    hinweise = sso.hinweise;
+  }
+  for (const x of hinweise) console.log('⚠ ' + x);
   if (fehler.length) {
     for (const x of fehler) console.log('✘ ' + x);
     console.log(`Vertrag v${VERTRAG_HAUPTVERSION}: ${fehler.length} Problem(e).`);
@@ -79,4 +134,4 @@ async function main() {
 }
 
 if (require.main === module) main();
-module.exports = { pruefeManifest, VERTRAG_HAUPTVERSION };
+module.exports = { pruefeManifest, pruefeSsoStart, ssoStartPfad, VERTRAG_HAUPTVERSION };
